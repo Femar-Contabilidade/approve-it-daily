@@ -16,6 +16,7 @@ const Index = () => {
     evaluationTab: "Avaliação",
     approvedTab: "Aprovado", 
     rejectedTab: "Rejeitado",
+    logoUrl: "",
   });
 
   const handleLogin = (user: string, password: string) => {
@@ -34,7 +35,7 @@ const Index = () => {
   };
 
   if (!isAuthenticated) {
-    return <Login onLogin={handleLogin} />;
+    return <Login onLogin={handleLogin} logoUrl={spreadsheetConfig.logoUrl} />;
   }
 
   return (
@@ -43,6 +44,7 @@ const Index = () => {
         onSettingsClick={() => setShowSettings(true)}
         onLogout={handleLogout}
         username={username}
+        logoUrl={spreadsheetConfig.logoUrl}
       />
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">

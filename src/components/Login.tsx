@@ -9,9 +9,10 @@ import { Eye, EyeOff } from "lucide-react";
 
 interface LoginProps {
   onLogin: (username: string, password: string) => void;
+  logoUrl?: string;
 }
 
-export const Login = ({ onLogin }: LoginProps) => {
+export const Login = ({ onLogin, logoUrl }: LoginProps) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -55,9 +56,17 @@ export const Login = ({ onLogin }: LoginProps) => {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="w-16 h-16 bg-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-xl">CA</span>
-          </div>
+          {logoUrl ? (
+            <img 
+              src={logoUrl} 
+              alt="Logo da empresa" 
+              className="h-16 w-auto object-contain mx-auto mb-4"
+            />
+          ) : (
+            <div className="w-16 h-16 bg-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <span className="text-white font-bold text-xl">CA</span>
+            </div>
+          )}
           <CardTitle className="text-2xl">Aprovação de Conteúdo</CardTitle>
           <CardDescription>
             Faça login para acessar o sistema de aprovação

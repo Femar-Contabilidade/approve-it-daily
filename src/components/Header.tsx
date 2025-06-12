@@ -6,17 +6,26 @@ interface HeaderProps {
   onSettingsClick: () => void;
   onLogout: () => void;
   username: string;
+  logoUrl?: string;
 }
 
-export const Header = ({ onSettingsClick, onLogout, username }: HeaderProps) => {
+export const Header = ({ onSettingsClick, onLogout, username, logoUrl }: HeaderProps) => {
   return (
     <header className="bg-white border-b border-gray-200 shadow-sm">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-4">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">CA</span>
-            </div>
+            {logoUrl ? (
+              <img 
+                src={logoUrl} 
+                alt="Logo da empresa" 
+                className="h-8 w-auto object-contain"
+              />
+            ) : (
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">CA</span>
+              </div>
+            )}
             <h2 className="text-xl font-semibold text-gray-900">Aprovação de Conteúdo</h2>
           </div>
           
