@@ -42,6 +42,22 @@ export const ContentPreview = ({ item, isOpen, onClose }: ContentPreviewProps) =
     }
   };
 
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'approved': return 'Aprovado';
+      case 'rejected': return 'Rejeitado';
+      default: return 'Pendente';
+    }
+  };
+
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'text': return 'texto';
+      case 'image': return 'imagem';
+      default: return 'misto';
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
@@ -50,7 +66,7 @@ export const ContentPreview = ({ item, isOpen, onClose }: ContentPreviewProps) =
             <DialogTitle className="text-xl">{item.title}</DialogTitle>
             <Badge variant="outline" className={getStatusColor(item.status)}>
               {getStatusIcon(item.status)}
-              <span className="ml-1 capitalize">{item.status}</span>
+              <span className="ml-1">{getStatusLabel(item.status)}</span>
             </Badge>
           </div>
         </DialogHeader>
@@ -59,9 +75,9 @@ export const ContentPreview = ({ item, isOpen, onClose }: ContentPreviewProps) =
           <div className="text-sm text-gray-500 space-x-4">
             <span>{item.category}</span>
             <span>•</span>
-            <span>{new Date(item.timestamp).toLocaleString()}</span>
+            <span>{new Date(item.timestamp).toLocaleString('pt-BR')}</span>
             <span>•</span>
-            <span className="capitalize">{item.type} content</span>
+            <span>Conteúdo {getTypeLabel(item.type)}</span>
           </div>
 
           {item.imageUrl && (
@@ -81,15 +97,15 @@ export const ContentPreview = ({ item, isOpen, onClose }: ContentPreviewProps) =
           </div>
 
           <div className="bg-gray-50 rounded-lg p-4">
-            <h4 className="font-medium text-gray-900 mb-2">Publication Preview</h4>
+            <h4 className="font-medium text-gray-900 mb-2">Prévia da Publicação</h4>
             <div className="bg-white rounded border p-4">
               <div className="flex items-center space-x-3 mb-3">
                 <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm font-bold">B</span>
+                  <span className="text-white text-sm font-bold">M</span>
                 </div>
                 <div>
-                  <div className="font-medium text-sm">Brand Name</div>
-                  <div className="text-xs text-gray-500">2 minutes ago</div>
+                  <div className="font-medium text-sm">Marca</div>
+                  <div className="text-xs text-gray-500">2 minutos atrás</div>
                 </div>
               </div>
               

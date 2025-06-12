@@ -41,8 +41,16 @@ export const ContentCard = ({ item, onApprove, onReject }: ContentCardProps) => 
     }
   };
 
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'approved': return 'Aprovado';
+      case 'rejected': return 'Rejeitado';
+      default: return 'Pendente';
+    }
+  };
+
   const formatTimestamp = (timestamp: string) => {
-    return new Date(timestamp).toLocaleString();
+    return new Date(timestamp).toLocaleString('pt-BR');
   };
 
   return (
@@ -54,7 +62,7 @@ export const ContentCard = ({ item, onApprove, onReject }: ContentCardProps) => 
               <h3 className="text-lg font-semibold text-gray-900">{item.title}</h3>
               <Badge variant="outline" className={getStatusColor(item.status)}>
                 {getStatusIcon(item.status)}
-                <span className="ml-1 capitalize">{item.status}</span>
+                <span className="ml-1">{getStatusLabel(item.status)}</span>
               </Badge>
             </div>
             <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
@@ -62,7 +70,7 @@ export const ContentCard = ({ item, onApprove, onReject }: ContentCardProps) => 
               <span>•</span>
               <span>{formatTimestamp(item.timestamp)}</span>
               <span>•</span>
-              <span className="capitalize">{item.type} content</span>
+              <span className="capitalize">Conteúdo {item.type === 'text' ? 'texto' : item.type === 'image' ? 'imagem' : 'misto'}</span>
             </div>
           </div>
         </div>
@@ -88,7 +96,7 @@ export const ContentCard = ({ item, onApprove, onReject }: ContentCardProps) => 
             className="flex items-center space-x-2"
           >
             <Eye className="w-4 h-4" />
-            <span>Preview</span>
+            <span>Visualizar</span>
           </Button>
 
           {item.status === 'pending' && (
@@ -100,7 +108,7 @@ export const ContentCard = ({ item, onApprove, onReject }: ContentCardProps) => 
                 className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
               >
                 <X className="w-4 h-4 mr-1" />
-                Reject
+                Rejeitar
               </Button>
               <Button
                 size="sm"
@@ -108,7 +116,7 @@ export const ContentCard = ({ item, onApprove, onReject }: ContentCardProps) => 
                 className="bg-green-600 hover:bg-green-700 text-white"
               >
                 <Check className="w-4 h-4 mr-1" />
-                Approve
+                Aprovar
               </Button>
             </div>
           )}

@@ -8,10 +8,10 @@ interface FilterBarProps {
 
 export const FilterBar = ({ currentFilter, onFilterChange }: FilterBarProps) => {
   const filters = [
-    { key: 'all' as const, label: 'All Content', count: 12 },
-    { key: 'pending' as const, label: 'Pending', count: 8 },
-    { key: 'approved' as const, label: 'Approved', count: 3 },
-    { key: 'rejected' as const, label: 'Rejected', count: 1 },
+    { key: 'all' as const, label: 'Todo Conteúdo', count: 12 },
+    { key: 'pending' as const, label: 'Pendente', count: 8 },
+    { key: 'approved' as const, label: 'Aprovado', count: 3 },
+    { key: 'rejected' as const, label: 'Rejeitado', count: 1 },
   ];
 
   return (

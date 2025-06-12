@@ -25,8 +25,8 @@ export const ContentFeed = ({ filter }: ContentFeedProps) => {
     {
       id: '1',
       type: 'mixed',
-      title: 'Summer Campaign Launch',
-      content: 'Exciting news! Our summer collection is now live. Discover fresh styles and vibrant colors that will make your season unforgettable. #SummerStyle #Fashion',
+      title: 'Lançamento da Campanha de Verão',
+      content: 'Notícias emocionantes! Nossa coleção de verão já está disponível. Descubra estilos frescos e cores vibrantes que tornarão sua temporada inesquecível. #EstiloVerão #Moda',
       imageUrl: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=400&h=300&fit=crop',
       status: 'pending',
       timestamp: '2024-06-12T09:30:00Z',
@@ -35,37 +35,37 @@ export const ContentFeed = ({ filter }: ContentFeedProps) => {
     {
       id: '2',
       type: 'text',
-      title: 'Product Update Announcement',
-      content: 'We are thrilled to announce new features in our latest update. Enhanced user experience, improved performance, and better security measures are now available.',
+      title: 'Anúncio de Atualização do Produto',
+      content: 'Estamos empolgados em anunciar novos recursos em nossa última atualização. Experiência do usuário aprimorada, melhor desempenho e medidas de segurança aprimoradas já estão disponíveis.',
       status: 'pending',
       timestamp: '2024-06-12T08:45:00Z',
-      category: 'Product'
+      category: 'Produto'
     },
     {
       id: '3',
       type: 'image',
-      title: 'Team Building Event',
-      content: 'Our amazing team had a fantastic day at the annual team building event. Great collaboration and fun activities!',
+      title: 'Evento de Integração da Equipe',
+      content: 'Nossa equipe incrível teve um dia fantástico no evento anual de integração da equipe. Ótima colaboração e atividades divertidas!',
       imageUrl: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=400&h=300&fit=crop',
       status: 'approved',
       timestamp: '2024-06-12T07:15:00Z',
-      category: 'Company'
+      category: 'Empresa'
     },
     {
       id: '4',
       type: 'mixed',
-      title: 'Customer Success Story',
-      content: 'Read how our client achieved 300% growth using our platform. Their journey is truly inspiring and shows the power of innovation.',
+      title: 'História de Sucesso do Cliente',
+      content: 'Leia como nosso cliente alcançou 300% de crescimento usando nossa plataforma. Sua jornada é verdadeiramente inspiradora e mostra o poder da inovação.',
       imageUrl: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=300&fit=crop',
       status: 'pending',
       timestamp: '2024-06-12T06:30:00Z',
-      category: 'Case Study'
+      category: 'Caso de Estudo'
     },
     {
       id: '5',
       type: 'text',
-      title: 'Industry Insights',
-      content: 'The future of technology is here. Explore the latest trends and innovations that are shaping our industry landscape.',
+      title: 'Insights da Indústria',
+      content: 'O futuro da tecnologia está aqui. Explore as últimas tendências e inovações que estão moldando o cenário da nossa indústria.',
       status: 'rejected',
       timestamp: '2024-06-12T05:45:00Z',
       category: 'Insights'
@@ -79,8 +79,8 @@ export const ContentFeed = ({ filter }: ContentFeedProps) => {
       )
     );
     toast({
-      title: "Content Approved",
-      description: "The content has been approved and will be published.",
+      title: "Conteúdo Aprovado",
+      description: "O conteúdo foi aprovado e será publicado.",
     });
   };
 
@@ -91,8 +91,8 @@ export const ContentFeed = ({ filter }: ContentFeedProps) => {
       )
     );
     toast({
-      title: "Content Rejected",
-      description: "The content has been rejected and will not be published.",
+      title: "Conteúdo Rejeitado",
+      description: "O conteúdo foi rejeitado e não será publicado.",
       variant: "destructive",
     });
   };
@@ -108,8 +108,8 @@ export const ContentFeed = ({ filter }: ContentFeedProps) => {
         <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
           <span className="text-2xl text-gray-400">📝</span>
         </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No content found</h3>
-        <p className="text-gray-500">There are no content items matching your current filter.</p>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum conteúdo encontrado</h3>
+        <p className="text-gray-500">Não há itens de conteúdo que correspondam ao seu filtro atual.</p>
       </div>
     );
   }
