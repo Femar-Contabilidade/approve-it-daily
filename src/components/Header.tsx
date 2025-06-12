@@ -1,15 +1,16 @@
 
-import { Bell, User, Settings as SettingsIcon, LogOut } from "lucide-react";
+import { Bell, User, Settings as SettingsIcon, LogOut, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface HeaderProps {
   onSettingsClick: () => void;
   onLogout: () => void;
+  onRefresh: () => void;
   username: string;
   logoUrl?: string;
 }
 
-export const Header = ({ onSettingsClick, onLogout, username, logoUrl }: HeaderProps) => {
+export const Header = ({ onSettingsClick, onLogout, onRefresh, username, logoUrl }: HeaderProps) => {
   return (
     <header className="bg-white border-b border-gray-200 shadow-sm">
       <div className="container mx-auto px-4">
@@ -34,6 +35,9 @@ export const Header = ({ onSettingsClick, onLogout, username, logoUrl }: HeaderP
             <Button variant="ghost" size="sm" className="relative">
               <Bell className="w-5 h-5" />
               <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full text-xs"></span>
+            </Button>
+            <Button variant="ghost" size="sm" onClick={onRefresh} title="Atualizar conteúdo">
+              <RefreshCw className="w-5 h-5" />
             </Button>
             <Button variant="ghost" size="sm" onClick={onSettingsClick}>
               <SettingsIcon className="w-5 h-5" />

@@ -115,10 +115,6 @@ export const Login = ({ onLogin, logoUrl }: LoginProps) => {
               {isLoading ? "Entrando..." : "Entrar"}
             </Button>
           </form>
-          <div className="mt-4 text-sm text-gray-600 text-center">
-            <p>Usuário demo: admin</p>
-            <p>Senha demo: admin123</p>
-          </div>
         </CardContent>
       </Card>
     </div>

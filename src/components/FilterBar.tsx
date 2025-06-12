@@ -4,14 +4,20 @@ import { Button } from "@/components/ui/button";
 interface FilterBarProps {
   currentFilter: 'all' | 'pending' | 'approved' | 'rejected';
   onFilterChange: (filter: 'all' | 'pending' | 'approved' | 'rejected') => void;
+  contentCounts: {
+    all: number;
+    pending: number;
+    approved: number;
+    rejected: number;
+  };
 }
 
-export const FilterBar = ({ currentFilter, onFilterChange }: FilterBarProps) => {
+export const FilterBar = ({ currentFilter, onFilterChange, contentCounts }: FilterBarProps) => {
   const filters = [
-    { key: 'all' as const, label: 'Todo Conteúdo', count: 12 },
-    { key: 'pending' as const, label: 'Pendente', count: 8 },
-    { key: 'approved' as const, label: 'Aprovado', count: 3 },
-    { key: 'rejected' as const, label: 'Rejeitado', count: 1 },
+    { key: 'all' as const, label: 'Todo Conteúdo', count: contentCounts.all },
+    { key: 'pending' as const, label: 'Pendente', count: contentCounts.pending },
+    { key: 'approved' as const, label: 'Aprovado', count: contentCounts.approved },
+    { key: 'rejected' as const, label: 'Rejeitado', count: contentCounts.rejected },
   ];
 
   return (

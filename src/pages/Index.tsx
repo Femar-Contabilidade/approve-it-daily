@@ -11,12 +11,21 @@ const Index = () => {
   const [username, setUsername] = useState("");
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [showSettings, setShowSettings] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [spreadsheetConfig, setSpreadsheetConfig] = useState<SpreadsheetConfig>({
     spreadsheetUrl: "",
     evaluationTab: "Avaliação",
     approvedTab: "Aprovado", 
     rejectedTab: "Rejeitado",
     logoUrl: "",
+  });
+
+  // Content counts for filter bar (will be updated from Google Sheets)
+  const [contentCounts, setContentCounts] = useState({
+    all: 0,
+    pending: 0,
+    approved: 0,
+    rejected: 0,
   });
 
   const handleLogin = (user: string, password: string) => {
@@ -29,9 +38,16 @@ const Index = () => {
     setUsername("");
   };
 
+  const handleRefresh = () => {
+    setRefreshTrigger(prev => prev + 1);
+    console.log("Atualizando conteúdo da planilha...");
+  };
+
   const handleSaveSettings = (config: SpreadsheetConfig) => {
     setSpreadsheetConfig(config);
     console.log("Configuração da planilha salva:", config);
+    // Trigger refresh after saving settings
+    setRefreshTrigger(prev => prev + 1);
   };
 
   if (!isAuthenticated) {
@@ -43,6 +59,7 @@ const Index = () => {
       <Header 
         onSettingsClick={() => setShowSettings(true)}
         onLogout={handleLogout}
+        onRefresh={handleRefresh}
         username={username}
         logoUrl={spreadsheetConfig.logoUrl}
       />
@@ -53,8 +70,15 @@ const Index = () => {
             <p className="text-gray-600">Revise e aprove conteúdo para publicação</p>
           </div>
           
-          <FilterBar currentFilter={filter} onFilterChange={setFilter} />
-          <ContentFeed filter={filter} />
+          <FilterBar 
+            currentFilter={filter} 
+            onFilterChange={setFilter}
+            contentCounts={contentCounts}
+          />
+          <ContentFeed 
+            filter={filter}
+            refreshTrigger={refreshTrigger}
+          />
         </div>
       </main>
 
