@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,20 +6,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Settings as SettingsIcon, Save, Upload, Users, Plus, Edit, Trash2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SpreadsheetColumnsManager } from "@/components/SpreadsheetColumnsManager";
+import { useSpreadsheetConfig, SpreadsheetConfig } from "@/hooks/useSpreadsheetConfig";
 
 interface SettingsProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (config: SpreadsheetConfig) => void;
   currentConfig?: SpreadsheetConfig;
-}
-
-export interface SpreadsheetConfig {
-  spreadsheetUrl: string;
-  evaluationTab: string;
-  approvedTab: string;
-  rejectedTab: string;
-  logoUrl?: string;
 }
 
 export interface User {
@@ -31,16 +24,9 @@ export interface User {
   createdAt: string;
 }
 
-export const Settings = ({ isOpen, onClose, onSave, currentConfig }: SettingsProps) => {
-  const [config, setConfig] = useState<SpreadsheetConfig>(
-    currentConfig || {
-      spreadsheetUrl: "",
-      evaluationTab: "Avaliação",
-      approvedTab: "Aprovado",
-      rejectedTab: "Rejeitado",
-      logoUrl: "",
-    }
-  );
+export const Settings = ({ isOpen, onClose, onSave }: SettingsProps) => {
+  const { config, saveConfig, isLoading } = useSpreadsheetConfig();
+  const [localConfig, setLocalConfig] = useState<SpreadsheetConfig>(config);
 
   const [users, setUsers] = useState<User[]>([
     {
@@ -61,10 +47,14 @@ export const Settings = ({ isOpen, onClose, onSave, currentConfig }: SettingsPro
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    setLocalConfig(config);
+  }, [config]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!config.spreadsheetUrl) {
+    if (!localConfig.spreadsheetUrl) {
       toast({
         title: "Erro",
         description: "Por favor, insira a URL da planilha.",
@@ -73,12 +63,11 @@ export const Settings = ({ isOpen, onClose, onSave, currentConfig }: SettingsPro
       return;
     }
 
-    onSave(config);
-    toast({
-      title: "Configurações salvas",
-      description: "As configurações foram atualizadas com sucesso.",
-    });
-    onClose();
+    const success = await saveConfig(localConfig);
+    if (success) {
+      onSave(localConfig);
+      onClose();
+    }
   };
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,7 +75,7 @@ export const Settings = ({ isOpen, onClose, onSave, currentConfig }: SettingsPro
     if (file) {
       const reader = new FileReader();
       reader.onload = (event) => {
-        setConfig({ ...config, logoUrl: event.target?.result as string });
+        setLocalConfig({ ...localConfig, logoUrl: event.target?.result as string });
       };
       reader.readAsDataURL(file);
     }
@@ -152,20 +141,22 @@ export const Settings = ({ isOpen, onClose, onSave, currentConfig }: SettingsPro
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-4xl max-h-[90vh] overflow-auto">
+      <Card className="w-full max-w-6xl max-h-[90vh] overflow-auto">
         <CardHeader>
           <div className="flex items-center space-x-2">
             <SettingsIcon className="w-5 h-5" />
             <CardTitle>Configurações do Sistema</CardTitle>
           </div>
           <CardDescription>
-            Configure a planilha, logo da empresa e gerencie usuários
+            Configure a planilha, colunas, autenticação Google, logo da empresa e gerencie usuários
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="spreadsheet" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="spreadsheet">Planilha</TabsTrigger>
+              <TabsTrigger value="columns">Colunas</TabsTrigger>
+              <TabsTrigger value="google-auth">Google Auth</TabsTrigger>
               <TabsTrigger value="branding">Logo</TabsTrigger>
               <TabsTrigger value="users">Usuários</TabsTrigger>
             </TabsList>
@@ -178,8 +169,8 @@ export const Settings = ({ isOpen, onClose, onSave, currentConfig }: SettingsPro
                     id="spreadsheetUrl"
                     type="url"
                     placeholder="https://docs.google.com/spreadsheets/d/..."
-                    value={config.spreadsheetUrl}
-                    onChange={(e) => setConfig({ ...config, spreadsheetUrl: e.target.value })}
+                    value={localConfig.spreadsheetUrl}
+                    onChange={(e) => setLocalConfig({ ...localConfig, spreadsheetUrl: e.target.value })}
                     required
                   />
                 </div>
@@ -191,8 +182,8 @@ export const Settings = ({ isOpen, onClose, onSave, currentConfig }: SettingsPro
                       id="evaluationTab"
                       type="text"
                       placeholder="Nome da aba para avaliação"
-                      value={config.evaluationTab}
-                      onChange={(e) => setConfig({ ...config, evaluationTab: e.target.value })}
+                      value={localConfig.evaluationTab}
+                      onChange={(e) => setLocalConfig({ ...localConfig, evaluationTab: e.target.value })}
                       required
                     />
                   </div>
@@ -203,8 +194,8 @@ export const Settings = ({ isOpen, onClose, onSave, currentConfig }: SettingsPro
                       id="approvedTab"
                       type="text"
                       placeholder="Nome da aba para aprovados"
-                      value={config.approvedTab}
-                      onChange={(e) => setConfig({ ...config, approvedTab: e.target.value })}
+                      value={localConfig.approvedTab}
+                      onChange={(e) => setLocalConfig({ ...localConfig, approvedTab: e.target.value })}
                       required
                     />
                   </div>
@@ -215,8 +206,8 @@ export const Settings = ({ isOpen, onClose, onSave, currentConfig }: SettingsPro
                       id="rejectedTab"
                       type="text"
                       placeholder="Nome da aba para rejeitados"
-                      value={config.rejectedTab}
-                      onChange={(e) => setConfig({ ...config, rejectedTab: e.target.value })}
+                      value={localConfig.rejectedTab}
+                      onChange={(e) => setLocalConfig({ ...localConfig, rejectedTab: e.target.value })}
                       required
                     />
                   </div>
@@ -226,12 +217,97 @@ export const Settings = ({ isOpen, onClose, onSave, currentConfig }: SettingsPro
                   <Button type="button" variant="outline" onClick={onClose}>
                     Cancelar
                   </Button>
-                  <Button type="submit">
+                  <Button type="submit" disabled={isLoading}>
                     <Save className="w-4 h-4 mr-2" />
                     Salvar Configurações
                   </Button>
                 </div>
               </form>
+            </TabsContent>
+
+            <TabsContent value="columns" className="space-y-4">
+              <SpreadsheetColumnsManager
+                columns={localConfig.columns}
+                onColumnsChange={(columns) => setLocalConfig({ ...localConfig, columns })}
+              />
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button type="button" variant="outline" onClick={onClose}>
+                  Cancelar
+                </Button>
+                <Button onClick={() => handleSubmit({ preventDefault: () => {} } as React.FormEvent)} disabled={isLoading}>
+                  <Save className="w-4 h-4 mr-2" />
+                  Salvar Colunas
+                </Button>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="google-auth" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Autenticação com Google</CardTitle>
+                  <CardDescription>
+                    Configure as credenciais para acessar planilhas privadas do Google Sheets
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="requiresGoogleAuth"
+                      checked={localConfig.requiresGoogleAuth}
+                      onChange={(e) => setLocalConfig({ ...localConfig, requiresGoogleAuth: e.target.checked })}
+                    />
+                    <Label htmlFor="requiresGoogleAuth">Requer autenticação Google</Label>
+                  </div>
+
+                  {localConfig.requiresGoogleAuth && (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="googleClientId">Google Client ID</Label>
+                        <Input
+                          id="googleClientId"
+                          type="text"
+                          placeholder="Digite o Client ID do Google"
+                          value={localConfig.googleClientId || ""}
+                          onChange={(e) => setLocalConfig({ ...localConfig, googleClientId: e.target.value })}
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="googleClientSecret">Google Client Secret</Label>
+                        <Input
+                          id="googleClientSecret"
+                          type="password"
+                          placeholder="Digite o Client Secret do Google"
+                          value={localConfig.googleClientSecret || ""}
+                          onChange={(e) => setLocalConfig({ ...localConfig, googleClientSecret: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="bg-blue-50 p-4 rounded-lg">
+                        <h4 className="font-medium text-blue-900 mb-2">Como configurar:</h4>
+                        <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
+                          <li>Acesse o Google Cloud Console</li>
+                          <li>Crie um projeto ou selecione um existente</li>
+                          <li>Ative a API do Google Sheets</li>
+                          <li>Crie credenciais OAuth 2.0</li>
+                          <li>Cole o Client ID e Secret aqui</li>
+                        </ol>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button type="button" variant="outline" onClick={onClose}>
+                  Cancelar
+                </Button>
+                <Button onClick={() => handleSubmit({ preventDefault: () => {} } as React.FormEvent)} disabled={isLoading}>
+                  <Save className="w-4 h-4 mr-2" />
+                  Salvar Autenticação
+                </Button>
+              </div>
             </TabsContent>
 
             <TabsContent value="branding" className="space-y-4">
@@ -251,11 +327,11 @@ export const Settings = ({ isOpen, onClose, onSave, currentConfig }: SettingsPro
                       Fazer Upload
                     </Button>
                   </div>
-                  {config.logoUrl && (
+                  {localConfig.logoUrl && (
                     <div className="mt-4">
                       <p className="text-sm text-gray-600 mb-2">Prévia do logo:</p>
                       <img 
-                        src={config.logoUrl} 
+                        src={localConfig.logoUrl} 
                         alt="Logo da empresa" 
                         className="h-16 w-auto object-contain border rounded"
                       />
@@ -267,7 +343,7 @@ export const Settings = ({ isOpen, onClose, onSave, currentConfig }: SettingsPro
                   <Button type="button" variant="outline" onClick={onClose}>
                     Cancelar
                   </Button>
-                  <Button onClick={() => handleSubmit({ preventDefault: () => {} } as React.FormEvent)}>
+                  <Button onClick={() => handleSubmit({ preventDefault: () => {} } as React.FormEvent)} disabled={isLoading}>
                     <Save className="w-4 h-4 mr-2" />
                     Salvar Logo
                   </Button>

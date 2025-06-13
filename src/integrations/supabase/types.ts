@@ -45,14 +45,61 @@ export type Database = {
         }
         Relationships: []
       }
+      spreadsheet_columns: {
+        Row: {
+          column_letter: string
+          column_name: string
+          config_id: string
+          created_at: string
+          display_order: number | null
+          field_type: string
+          id: string
+          is_required: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          column_letter: string
+          column_name: string
+          config_id: string
+          created_at?: string
+          display_order?: number | null
+          field_type: string
+          id?: string
+          is_required?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          column_letter?: string
+          column_name?: string
+          config_id?: string
+          created_at?: string
+          display_order?: number | null
+          field_type?: string
+          id?: string
+          is_required?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spreadsheet_columns_config_id_fkey"
+            columns: ["config_id"]
+            isOneToOne: false
+            referencedRelation: "spreadsheet_config"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       spreadsheet_config: {
         Row: {
           approved_tab: string | null
           created_at: string
           evaluation_tab: string | null
+          google_client_id: string | null
+          google_client_secret: string | null
           id: string
           logo_url: string | null
           rejected_tab: string | null
+          requires_google_auth: boolean | null
           spreadsheet_url: string
           updated_at: string
         }
@@ -60,9 +107,12 @@ export type Database = {
           approved_tab?: string | null
           created_at?: string
           evaluation_tab?: string | null
+          google_client_id?: string | null
+          google_client_secret?: string | null
           id?: string
           logo_url?: string | null
           rejected_tab?: string | null
+          requires_google_auth?: boolean | null
           spreadsheet_url: string
           updated_at?: string
         }
@@ -70,9 +120,12 @@ export type Database = {
           approved_tab?: string | null
           created_at?: string
           evaluation_tab?: string | null
+          google_client_id?: string | null
+          google_client_secret?: string | null
           id?: string
           logo_url?: string | null
           rejected_tab?: string | null
+          requires_google_auth?: boolean | null
           spreadsheet_url?: string
           updated_at?: string
         }

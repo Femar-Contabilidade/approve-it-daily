@@ -34,6 +34,24 @@ serve(async (req) => {
       )
     }
 
+    // Get column configurations
+    const { data: columns, error: columnsError } = await supabaseClient
+      .from('spreadsheet_columns')
+      .select('*')
+      .eq('config_id', config.id)
+      .order('display_order')
+
+    if (columnsError) {
+      console.error('Erro ao carregar configurações de colunas:', columnsError)
+      return new Response(
+        JSON.stringify({ error: 'Erro ao carregar configurações de colunas' }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
     // Extract spreadsheet ID from URL
     const spreadsheetId = extractSpreadsheetId(config.spreadsheet_url)
     if (!spreadsheetId) {
@@ -49,16 +67,16 @@ serve(async (req) => {
     // Clear existing content
     await supabaseClient.from('content_items').delete().neq('id', '00000000-0000-0000-0000-000000000000')
 
-    // Fetch data from Google Sheets (evaluation tab)
+    // Fetch data from Google Sheets (evaluation tab only for now)
     const evaluationData = await fetchSheetData(spreadsheetId, config.evaluation_tab)
     const approvedData = await fetchSheetData(spreadsheetId, config.approved_tab)
     const rejectedData = await fetchSheetData(spreadsheetId, config.rejected_tab)
 
-    // Process and insert data
+    // Process and insert data using column configurations
     const contentItems = [
-      ...processSheetData(evaluationData, 'pending'),
-      ...processSheetData(approvedData, 'approved'),
-      ...processSheetData(rejectedData, 'rejected')
+      ...processSheetDataWithColumns(evaluationData, columns || [], 'pending'),
+      ...processSheetDataWithColumns(approvedData, columns || [], 'approved'),
+      ...processSheetDataWithColumns(rejectedData, columns || [], 'rejected')
     ]
 
     if (contentItems.length > 0) {
@@ -81,7 +99,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         message: 'Sincronização concluída com sucesso',
-        itemsProcessed: contentItems.length 
+        itemsProcessed: contentItems.length,
+        columnsUsed: columns?.length || 0
       }),
       { 
         status: 200, 
@@ -130,26 +149,59 @@ async function fetchSheetData(spreadsheetId: string, tabName: string): Promise<a
   }
 }
 
-function processSheetData(data: any[], status: string): any[] {
-  if (!data || data.length < 2) return []
+function columnLetterToIndex(letter: string): number {
+  let index = 0
+  for (let i = 0; i < letter.length; i++) {
+    index = index * 26 + (letter.charCodeAt(i) - 'A'.charCodeAt(0) + 1)
+  }
+  return index - 1 // Convert to 0-based index
+}
 
-  const headers = data[0]
-  const rows = data.slice(1)
+function processSheetDataWithColumns(data: any[], columns: any[], status: string): any[] {
+  if (!data || data.length < 2 || !columns || columns.length === 0) return []
+
+  const rows = data.slice(1) // Skip header row
 
   return rows.map((row: any[]) => {
     const item: any = {
       status,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      category: 'Geral', // Default category
     }
 
-    // Map common columns (adjust based on your sheet structure)
-    item.title = row[0] || 'Sem título'
-    item.content = row[1] || 'Sem conteúdo'
-    item.category = row[2] || 'Geral'
-    item.image_url = row[3] || null
-    item.type = row[4] || (item.image_url ? 'image' : 'text')
+    // Map columns based on configuration
+    columns.forEach(column => {
+      const columnIndex = columnLetterToIndex(column.column_letter)
+      const cellValue = row[columnIndex] || ''
+
+      switch (column.field_type) {
+        case 'title':
+          item.title = cellValue || 'Sem título'
+          break
+        case 'content':
+          item.content = cellValue || 'Sem conteúdo'
+          break
+        case 'image_url':
+          item.image_url = cellValue || null
+          break
+        case 'category':
+          item.category = cellValue || 'Geral'
+          break
+        case 'custom':
+          // For custom fields, we could store them in a JSON field or handle differently
+          // For now, we'll ignore custom fields as they don't map to existing columns
+          break
+      }
+    })
+
+    // Ensure required fields have values
+    if (!item.title) item.title = 'Sem título'
+    if (!item.content) item.content = 'Sem conteúdo'
+    
+    // Determine content type
+    item.type = item.image_url ? (item.content ? 'mixed' : 'image') : 'text'
 
     return item
-  }).filter(item => item.title && item.content)
+  }).filter(item => item.title && item.content) // Only return items with essential data
 }

@@ -4,7 +4,8 @@ import { ContentFeed } from "@/components/ContentFeed";
 import { Header } from "@/components/Header";
 import { FilterBar } from "@/components/FilterBar";
 import { Login } from "@/components/Login";
-import { Settings, SpreadsheetConfig } from "@/components/Settings";
+import { Settings } from "@/components/Settings";
+import { useSpreadsheetConfig, SpreadsheetConfig } from "@/hooks/useSpreadsheetConfig";
 
 const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -12,13 +13,7 @@ const Index = () => {
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [showSettings, setShowSettings] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [spreadsheetConfig, setSpreadsheetConfig] = useState<SpreadsheetConfig>({
-    spreadsheetUrl: "",
-    evaluationTab: "Avaliação",
-    approvedTab: "Aprovado", 
-    rejectedTab: "Rejeitado",
-    logoUrl: "",
-  });
+  const { config } = useSpreadsheetConfig();
 
   // Content counts for filter bar
   const [contentCounts, setContentCounts] = useState({
@@ -43,9 +38,8 @@ const Index = () => {
     console.log("Atualizando conteúdo da planilha...");
   };
 
-  const handleSaveSettings = (config: SpreadsheetConfig) => {
-    setSpreadsheetConfig(config);
-    console.log("Configuração da planilha salva:", config);
+  const handleSaveSettings = (newConfig: SpreadsheetConfig) => {
+    console.log("Configuração da planilha salva:", newConfig);
     // Trigger refresh after saving settings
     setRefreshTrigger(prev => prev + 1);
   };
@@ -60,7 +54,7 @@ const Index = () => {
   };
 
   if (!isAuthenticated) {
-    return <Login onLogin={handleLogin} logoUrl={spreadsheetConfig.logoUrl} />;
+    return <Login onLogin={handleLogin} logoUrl={config.logoUrl} />;
   }
 
   return (
@@ -70,13 +64,20 @@ const Index = () => {
         onLogout={handleLogout}
         onRefresh={handleRefresh}
         username={username}
-        logoUrl={spreadsheetConfig.logoUrl}
+        logoUrl={config.logoUrl}
       />
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard de Aprovação de Conteúdo</h1>
             <p className="text-gray-600">Revise e aprove conteúdo para publicação</p>
+            {config.columns.length > 0 && (
+              <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  <strong>Colunas configuradas:</strong> {config.columns.map(col => `${col.columnLetter} (${col.columnName})`).join(', ')}
+                </p>
+              </div>
+            )}
           </div>
           
           <FilterBar 
@@ -96,7 +97,7 @@ const Index = () => {
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
         onSave={handleSaveSettings}
-        currentConfig={spreadsheetConfig}
+        currentConfig={config}
       />
     </div>
   );
