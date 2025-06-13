@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Settings as SettingsIcon, Save, Upload, Users, Plus, Edit, Trash2, Zap } from "lucide-react";
+import { Settings as SettingsIcon, Save, Upload, Users, Plus, Edit, Trash2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SpreadsheetColumnsManager } from "@/components/SpreadsheetColumnsManager";
 import { IntegrationsManager } from "@/components/IntegrationsManager";
@@ -149,15 +149,14 @@ export const Settings = ({ isOpen, onClose, onSave }: SettingsProps) => {
             <CardTitle>Configurações do Sistema</CardTitle>
           </div>
           <CardDescription>
-            Configure a planilha, colunas, autenticação Google, logo da empresa, integrações e gerencie usuários
+            Configure a planilha, colunas, integrações, logo da empresa e gerencie usuários
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="spreadsheet" className="w-full">
-            <TabsList className="grid w-full grid-cols-6">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="spreadsheet">Planilha</TabsTrigger>
               <TabsTrigger value="columns">Colunas</TabsTrigger>
-              <TabsTrigger value="google-auth">Google Auth</TabsTrigger>
               <TabsTrigger value="branding">Logo</TabsTrigger>
               <TabsTrigger value="integrations">Integrações</TabsTrigger>
               <TabsTrigger value="users">Usuários</TabsTrigger>
@@ -207,7 +206,7 @@ export const Settings = ({ isOpen, onClose, onSave }: SettingsProps) => {
                     <Input
                       id="rejectedTab"
                       type="text"
-                      placeholder="Nome da aba para rejeitados"
+                      placeholder="Nome da para rejeitados"
                       value={localConfig.rejectedTab}
                       onChange={(e) => setLocalConfig({ ...localConfig, rejectedTab: e.target.value })}
                       required
@@ -239,75 +238,6 @@ export const Settings = ({ isOpen, onClose, onSave }: SettingsProps) => {
                 <Button onClick={() => handleSubmit({ preventDefault: () => {} } as React.FormEvent)} disabled={isLoading}>
                   <Save className="w-4 h-4 mr-2" />
                   Salvar Colunas
-                </Button>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="google-auth" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Autenticação com Google</CardTitle>
-                  <CardDescription>
-                    Configure as credenciais para acessar planilhas privadas do Google Sheets
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="requiresGoogleAuth"
-                      checked={localConfig.requiresGoogleAuth}
-                      onChange={(e) => setLocalConfig({ ...localConfig, requiresGoogleAuth: e.target.checked })}
-                    />
-                    <Label htmlFor="requiresGoogleAuth">Requer autenticação Google</Label>
-                  </div>
-
-                  {localConfig.requiresGoogleAuth && (
-                    <>
-                      <div className="space-y-2">
-                        <Label htmlFor="googleClientId">Google Client ID</Label>
-                        <Input
-                          id="googleClientId"
-                          type="text"
-                          placeholder="Digite o Client ID do Google"
-                          value={localConfig.googleClientId || ""}
-                          onChange={(e) => setLocalConfig({ ...localConfig, googleClientId: e.target.value })}
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="googleClientSecret">Google Client Secret</Label>
-                        <Input
-                          id="googleClientSecret"
-                          type="password"
-                          placeholder="Digite o Client Secret do Google"
-                          value={localConfig.googleClientSecret || ""}
-                          onChange={(e) => setLocalConfig({ ...localConfig, googleClientSecret: e.target.value })}
-                        />
-                      </div>
-
-                      <div className="bg-blue-50 p-4 rounded-lg">
-                        <h4 className="font-medium text-blue-900 mb-2">Como configurar:</h4>
-                        <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
-                          <li>Acesse o Google Cloud Console</li>
-                          <li>Crie um projeto ou selecione um existente</li>
-                          <li>Ative a API do Google Sheets</li>
-                          <li>Crie credenciais OAuth 2.0</li>
-                          <li>Cole o Client ID e Secret aqui</li>
-                        </ol>
-                      </div>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
-
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button type="button" variant="outline" onClick={onClose}>
-                  Cancelar
-                </Button>
-                <Button onClick={() => handleSubmit({ preventDefault: () => {} } as React.FormEvent)} disabled={isLoading}>
-                  <Save className="w-4 h-4 mr-2" />
-                  Salvar Autenticação
                 </Button>
               </div>
             </TabsContent>

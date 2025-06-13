@@ -1,11 +1,10 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Settings, Webhook, ExternalLink, Plus, Trash2, Copy } from "lucide-react";
+import { Settings, Webhook, ExternalLink, Plus, Trash2, Copy, Database, Edit } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Integration {
@@ -14,6 +13,16 @@ interface Integration {
   apiKey: string;
   baseUrl: string;
   enabled: boolean;
+  fields: IntegrationField[];
+  isCustom?: boolean;
+}
+
+interface IntegrationField {
+  key: string;
+  label: string;
+  type: 'text' | 'password' | 'url' | 'checkbox';
+  value: string | boolean;
+  required?: boolean;
 }
 
 interface WebhookConfig {
@@ -33,31 +42,57 @@ export const IntegrationsManager = () => {
   const [integrations, setIntegrations] = useState<Integration[]>([
     {
       id: "1",
-      name: "OpenAI",
+      name: "Evolution API",
       apiKey: "",
-      baseUrl: "https://api.openai.com/v1",
+      baseUrl: "https://api.evolution.com/v1",
       enabled: false,
+      fields: [
+        { key: "apiKey", label: "API Key", type: "password", value: "", required: true },
+        { key: "baseUrl", label: "URL Base", type: "url", value: "https://api.evolution.com/v1", required: true },
+        { key: "instanceName", label: "Nome da Instância", type: "text", value: "", required: true },
+        { key: "token", label: "Token de Acesso", type: "password", value: "", required: false }
+      ]
     },
     {
       id: "2",
-      name: "Zapier",
+      name: "Google Auth",
       apiKey: "",
-      baseUrl: "",
+      baseUrl: "https://accounts.google.com",
       enabled: false,
+      fields: [
+        { key: "clientId", label: "Google Client ID", type: "text", value: "", required: true },
+        { key: "clientSecret", label: "Google Client Secret", type: "password", value: "", required: true },
+        { key: "redirectUri", label: "URI de Redirecionamento", type: "url", value: `${window.location.origin}/auth/callback`, required: true },
+        { key: "scopes", label: "Escopos", type: "text", value: "openid email profile", required: true }
+      ]
     },
     {
       id: "3",
-      name: "Slack",
+      name: "Supabase",
       apiKey: "",
-      baseUrl: "https://slack.com/api",
-      enabled: false,
+      baseUrl: "https://fdlwhlxbcmpxtzwoobqo.supabase.co",
+      enabled: true,
+      fields: [
+        { key: "projectUrl", label: "URL do Projeto", type: "url", value: "https://fdlwhlxbcmpxtzwoobqo.supabase.co", required: true },
+        { key: "anonKey", label: "Anon Key", type: "password", value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkbHdobHhiY21weHR6d29vYnFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3NjQyOTcsImV4cCI6MjA2NTM0MDI5N30.S0QejL0tgsBY3LwiQx_LBOMBIX9WB4nae3jLZAT_rVA", required: true },
+        { key: "serviceRoleKey", label: "Service Role Key", type: "password", value: "", required: false },
+        { key: "projectId", label: "Project ID", type: "text", value: "fdlwhlxbcmpxtzwoobqo", required: true }
+      ]
     },
     {
       id: "4",
-      name: "Discord",
+      name: "MySQL",
       apiKey: "",
-      baseUrl: "https://discord.com/api/v10",
+      baseUrl: "",
       enabled: false,
+      fields: [
+        { key: "host", label: "Host", type: "text", value: "localhost", required: true },
+        { key: "port", label: "Porta", type: "text", value: "3306", required: true },
+        { key: "database", label: "Nome do Banco", type: "text", value: "", required: true },
+        { key: "username", label: "Usuário", type: "text", value: "", required: true },
+        { key: "password", label: "Senha", type: "password", value: "", required: true },
+        { key: "ssl", label: "Usar SSL", type: "checkbox", value: false, required: false }
+      ]
     }
   ]);
 
@@ -70,6 +105,29 @@ export const IntegrationsManager = () => {
     headers: {},
     type: "outgoing",
   });
+
+  // Estados para criar nova integração
+  const [showNewIntegrationForm, setShowNewIntegrationForm] = useState(false);
+  const [newIntegration, setNewIntegration] = useState({
+    name: "",
+    baseUrl: "",
+    fields: [] as IntegrationField[]
+  });
+
+  const handleIntegrationFieldUpdate = (integrationId: string, fieldKey: string, value: any) => {
+    setIntegrations(prev => 
+      prev.map(integration => 
+        integration.id === integrationId 
+          ? {
+              ...integration,
+              fields: integration.fields.map(field =>
+                field.key === fieldKey ? { ...field, value } : field
+              )
+            }
+          : integration
+      )
+    );
+  };
 
   const handleIntegrationUpdate = (id: string, field: keyof Integration, value: any) => {
     setIntegrations(prev => 
@@ -88,6 +146,79 @@ export const IntegrationsManager = () => {
       title: "Integração salva",
       description: `Configuração da ${integration?.name} foi salva com sucesso.`,
     });
+  };
+
+  const handleAddCustomIntegration = () => {
+    if (!newIntegration.name) {
+      toast({
+        title: "Erro",
+        description: "Por favor, informe o nome da integração.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const integration: Integration = {
+      id: Date.now().toString(),
+      name: newIntegration.name,
+      apiKey: "",
+      baseUrl: newIntegration.baseUrl,
+      enabled: false,
+      isCustom: true,
+      fields: [
+        { key: "apiKey", label: "API Key", type: "password", value: "", required: true },
+        { key: "baseUrl", label: "URL Base", type: "url", value: newIntegration.baseUrl, required: true },
+        ...newIntegration.fields
+      ]
+    };
+
+    setIntegrations(prev => [...prev, integration]);
+    setNewIntegration({ name: "", baseUrl: "", fields: [] });
+    setShowNewIntegrationForm(false);
+
+    toast({
+      title: "Integração criada",
+      description: "Nova integração adicionada com sucesso.",
+    });
+  };
+
+  const handleDeleteIntegration = (id: string) => {
+    const integration = integrations.find(i => i.id === id);
+    if (!integration?.isCustom) {
+      toast({
+        title: "Erro",
+        description: "Não é possível excluir integrações padrão do sistema.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIntegrations(prev => prev.filter(i => i.id !== id));
+    toast({
+      title: "Integração removida",
+      description: "Integração excluída com sucesso.",
+    });
+  };
+
+  const addFieldToNewIntegration = () => {
+    setNewIntegration(prev => ({
+      ...prev,
+      fields: [...prev.fields, { key: "", label: "", type: "text", value: "", required: false }]
+    }));
+  };
+
+  const updateNewIntegrationField = (index: number, field: Partial<IntegrationField>) => {
+    setNewIntegration(prev => ({
+      ...prev,
+      fields: prev.fields.map((f, i) => i === index ? { ...f, ...field } : f)
+    }));
+  };
+
+  const removeFieldFromNewIntegration = (index: number) => {
+    setNewIntegration(prev => ({
+      ...prev,
+      fields: prev.fields.filter((_, i) => i !== index)
+    }));
   };
 
   const handleAddWebhook = () => {
@@ -156,13 +287,120 @@ export const IntegrationsManager = () => {
         </TabsList>
 
         <TabsContent value="apis" className="space-y-4">
+          {/* Botão para adicionar nova integração */}
+          <div className="flex justify-end">
+            <Button 
+              onClick={() => setShowNewIntegrationForm(true)}
+              className="mb-4"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Nova Integração
+            </Button>
+          </div>
+
+          {/* Formulário para nova integração */}
+          {showNewIntegrationForm && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Criar Nova Integração</CardTitle>
+                <CardDescription>Configure uma nova integração de API personalizada</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="newIntegrationName">Nome da Integração</Label>
+                    <Input
+                      id="newIntegrationName"
+                      placeholder="Ex: WhatsApp API"
+                      value={newIntegration.name}
+                      onChange={(e) => setNewIntegration(prev => ({ ...prev, name: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="newIntegrationUrl">URL Base</Label>
+                    <Input
+                      id="newIntegrationUrl"
+                      type="url"
+                      placeholder="https://api.exemplo.com"
+                      value={newIntegration.baseUrl}
+                      onChange={(e) => setNewIntegration(prev => ({ ...prev, baseUrl: e.target.value }))}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label>Campos Personalizados</Label>
+                    <Button type="button" size="sm" onClick={addFieldToNewIntegration}>
+                      <Plus className="w-3 h-3 mr-1" />
+                      Adicionar Campo
+                    </Button>
+                  </div>
+                  
+                  {newIntegration.fields.map((field, index) => (
+                    <div key={index} className="grid grid-cols-4 gap-2 p-2 border rounded">
+                      <Input
+                        placeholder="Chave"
+                        value={field.key}
+                        onChange={(e) => updateNewIntegrationField(index, { key: e.target.value })}
+                      />
+                      <Input
+                        placeholder="Label"
+                        value={field.label}
+                        onChange={(e) => updateNewIntegrationField(index, { label: e.target.value })}
+                      />
+                      <select
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        value={field.type}
+                        onChange={(e) => updateNewIntegrationField(index, { type: e.target.value as any })}
+                      >
+                        <option value="text">Texto</option>
+                        <option value="password">Senha</option>
+                        <option value="url">URL</option>
+                        <option value="checkbox">Checkbox</option>
+                      </select>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => removeFieldFromNewIntegration(index)}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex justify-end space-x-2">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setShowNewIntegrationForm(false)}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button onClick={handleAddCustomIntegration}>
+                    Criar Integração
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Lista de integrações */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {integrations.map((integration) => (
               <Card key={integration.id} className="relative">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <ExternalLink className="w-5 h-5" />
+                      {integration.name === "Supabase" ? (
+                        <Database className="w-5 h-5" />
+                      ) : integration.name === "MySQL" ? (
+                        <Database className="w-5 h-5" />
+                      ) : (
+                        <ExternalLink className="w-5 h-5" />
+                      )}
                       <CardTitle className="text-lg">{integration.name}</CardTitle>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -173,6 +411,15 @@ export const IntegrationsManager = () => {
                         className="rounded"
                       />
                       <Label className="text-sm">Ativo</Label>
+                      {integration.isCustom && (
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleDeleteIntegration(integration.id)}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                   <CardDescription>
@@ -180,32 +427,42 @@ export const IntegrationsManager = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor={`apiKey-${integration.id}`}>API Key / Token</Label>
-                    <Input
-                      id={`apiKey-${integration.id}`}
-                      type="password"
-                      placeholder="Cole sua API key aqui"
-                      value={integration.apiKey}
-                      onChange={(e) => handleIntegrationUpdate(integration.id, 'apiKey', e.target.value)}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor={`baseUrl-${integration.id}`}>URL Base (opcional)</Label>
-                    <Input
-                      id={`baseUrl-${integration.id}`}
-                      type="url"
-                      placeholder="https://api.example.com"
-                      value={integration.baseUrl}
-                      onChange={(e) => handleIntegrationUpdate(integration.id, 'baseUrl', e.target.value)}
-                    />
-                  </div>
+                  {integration.fields.map((field) => (
+                    <div key={field.key} className="space-y-2">
+                      <Label htmlFor={`${integration.id}-${field.key}`}>
+                        {field.label}
+                        {field.required && <span className="text-red-500 ml-1">*</span>}
+                      </Label>
+                      {field.type === 'checkbox' ? (
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id={`${integration.id}-${field.key}`}
+                            checked={field.value as boolean}
+                            onChange={(e) => handleIntegrationFieldUpdate(integration.id, field.key, e.target.checked)}
+                            className="rounded"
+                          />
+                          <Label htmlFor={`${integration.id}-${field.key}`} className="text-sm">
+                            {field.label}
+                          </Label>
+                        </div>
+                      ) : (
+                        <Input
+                          id={`${integration.id}-${field.key}`}
+                          type={field.type}
+                          placeholder={`Digite ${field.label.toLowerCase()}`}
+                          value={field.value as string}
+                          onChange={(e) => handleIntegrationFieldUpdate(integration.id, field.key, e.target.value)}
+                          disabled={integration.name === "Supabase" && (field.key === "projectUrl" || field.key === "anonKey" || field.key === "projectId")}
+                        />
+                      )}
+                    </div>
+                  ))}
 
                   <Button 
                     onClick={() => handleSaveIntegration(integration.id)}
                     className="w-full"
-                    disabled={!integration.apiKey}
+                    disabled={integration.fields.filter(f => f.required).some(f => !f.value)}
                   >
                     <Settings className="w-4 h-4 mr-2" />
                     Salvar Configuração
