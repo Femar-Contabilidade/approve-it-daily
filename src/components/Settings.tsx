@@ -4,9 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Settings as SettingsIcon, Save, Upload, Users, Plus, Edit, Trash2 } from "lucide-react";
+import { Settings as SettingsIcon, Save, Upload, Users, Plus, Edit, Trash2, Zap } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SpreadsheetColumnsManager } from "@/components/SpreadsheetColumnsManager";
+import { IntegrationsManager } from "@/components/IntegrationsManager";
 import { useSpreadsheetConfig, SpreadsheetConfig } from "@/hooks/useSpreadsheetConfig";
 
 interface SettingsProps {
@@ -148,16 +149,17 @@ export const Settings = ({ isOpen, onClose, onSave }: SettingsProps) => {
             <CardTitle>Configurações do Sistema</CardTitle>
           </div>
           <CardDescription>
-            Configure a planilha, colunas, autenticação Google, logo da empresa e gerencie usuários
+            Configure a planilha, colunas, autenticação Google, logo da empresa, integrações e gerencie usuários
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="spreadsheet" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="spreadsheet">Planilha</TabsTrigger>
               <TabsTrigger value="columns">Colunas</TabsTrigger>
               <TabsTrigger value="google-auth">Google Auth</TabsTrigger>
               <TabsTrigger value="branding">Logo</TabsTrigger>
+              <TabsTrigger value="integrations">Integrações</TabsTrigger>
               <TabsTrigger value="users">Usuários</TabsTrigger>
             </TabsList>
 
@@ -349,6 +351,10 @@ export const Settings = ({ isOpen, onClose, onSave }: SettingsProps) => {
                   </Button>
                 </div>
               </div>
+            </TabsContent>
+
+            <TabsContent value="integrations" className="space-y-4">
+              <IntegrationsManager />
             </TabsContent>
 
             <TabsContent value="users" className="space-y-4">
