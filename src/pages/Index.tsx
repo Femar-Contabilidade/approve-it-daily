@@ -20,7 +20,7 @@ const Index = () => {
     logoUrl: "",
   });
 
-  // Content counts for filter bar (will be updated from Google Sheets)
+  // Content counts for filter bar
   const [contentCounts, setContentCounts] = useState({
     all: 0,
     pending: 0,
@@ -48,6 +48,15 @@ const Index = () => {
     console.log("Configuração da planilha salva:", config);
     // Trigger refresh after saving settings
     setRefreshTrigger(prev => prev + 1);
+  };
+
+  const handleContentCountsChange = (counts: {
+    all: number;
+    pending: number;
+    approved: number;
+    rejected: number;
+  }) => {
+    setContentCounts(counts);
   };
 
   if (!isAuthenticated) {
@@ -78,6 +87,7 @@ const Index = () => {
           <ContentFeed 
             filter={filter}
             refreshTrigger={refreshTrigger}
+            onContentCountsChange={handleContentCountsChange}
           />
         </div>
       </main>

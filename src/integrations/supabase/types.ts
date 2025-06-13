@@ -9,7 +9,102 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      content_items: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          id: string
+          image_url: string | null
+          status: string | null
+          title: string
+          type: string | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          status?: string | null
+          title: string
+          type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          status?: string | null
+          title?: string
+          type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      spreadsheet_config: {
+        Row: {
+          approved_tab: string | null
+          created_at: string
+          evaluation_tab: string | null
+          id: string
+          logo_url: string | null
+          rejected_tab: string | null
+          spreadsheet_url: string
+          updated_at: string
+        }
+        Insert: {
+          approved_tab?: string | null
+          created_at?: string
+          evaluation_tab?: string | null
+          id?: string
+          logo_url?: string | null
+          rejected_tab?: string | null
+          spreadsheet_url: string
+          updated_at?: string
+        }
+        Update: {
+          approved_tab?: string | null
+          created_at?: string
+          evaluation_tab?: string | null
+          id?: string
+          logo_url?: string | null
+          rejected_tab?: string | null
+          spreadsheet_url?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      users: {
+        Row: {
+          created_at: string
+          id: string
+          password_hash: string
+          updated_at: string
+          user_type: string | null
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          password_hash: string
+          updated_at?: string
+          user_type?: string | null
+          username: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          password_hash?: string
+          updated_at?: string
+          user_type?: string | null
+          username?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
