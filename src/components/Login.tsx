@@ -20,7 +20,7 @@ export const Login = ({ onLogin, logoUrl }: LoginProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!username || !password) {
       toast({
         title: "Erro",
@@ -29,12 +29,20 @@ export const Login = ({ onLogin, logoUrl }: LoginProps) => {
       });
       return;
     }
-
     setIsLoading(true);
-    
-    // Simulate login validation - in real app this would connect to your authentication system
-    setTimeout(() => {
-      if (username === "admin" && password === "admin123") {
+
+    try {
+      // Chama a Edge Function criada
+      const res = await fetch("/functions/v1/login-user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
         onLogin(username, password);
         toast({
           title: "Login realizado com sucesso",
@@ -43,12 +51,19 @@ export const Login = ({ onLogin, logoUrl }: LoginProps) => {
       } else {
         toast({
           title: "Erro de login",
-          description: "Usuário ou senha incorretos.",
+          description: data.error || "Usuário ou senha incorretos.",
           variant: "destructive",
         });
       }
+    } catch (error) {
+      toast({
+        title: "Erro de login",
+        description: "Erro inesperado ao tentar autenticar.",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
