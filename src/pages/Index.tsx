@@ -3,13 +3,13 @@ import { useState } from "react";
 import { ContentFeed } from "@/components/ContentFeed";
 import { Header } from "@/components/Header";
 import { FilterBar } from "@/components/FilterBar";
-import { Login } from "@/components/Login";
 import { Settings } from "@/components/Settings";
 import { useSpreadsheetConfig, SpreadsheetConfig } from "@/hooks/useSpreadsheetConfig";
 
 const Index = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [username, setUsername] = useState("");
+  // Removido estado de autenticação e usuário
+  // const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // const [username, setUsername] = useState("");
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [showSettings, setShowSettings] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -23,15 +23,17 @@ const Index = () => {
     rejected: 0,
   });
 
-  const handleLogin = (user: string, password: string) => {
-    setIsAuthenticated(true);
-    setUsername(user);
-  };
+  // Função de login removida
+  // const handleLogin = (user: string, password: string) => {
+  //   setIsAuthenticated(true);
+  //   setUsername(user);
+  // };
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    setUsername("");
-  };
+  // Função de logout removida
+  // const handleLogout = () => {
+  //   setIsAuthenticated(false);
+  //   setUsername("");
+  // };
 
   const handleRefresh = () => {
     setRefreshTrigger(prev => prev + 1);
@@ -53,17 +55,21 @@ const Index = () => {
     setContentCounts(counts);
   };
 
-  if (!isAuthenticated) {
-    return <Login onLogin={handleLogin} logoUrl={config.logoUrl} />;
-  }
+  // Removido bloqueio de login - fluxo agora é direto para a aplicação interna
+  // if (!isAuthenticated) {
+  //   return <Login onLogin={handleLogin} logoUrl={config.logoUrl} />;
+  // }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header 
+        // onSettingsClick={() => setShowSettings(true)}
+        // onLogout={handleLogout}
+        // username={username}
         onSettingsClick={() => setShowSettings(true)}
-        onLogout={handleLogout}
+        onLogout={() => {}} // placeholder, ignorado
         onRefresh={handleRefresh}
-        username={username}
+        username="Usuário" // valor estático, pois login não existe mais
         logoUrl={config.logoUrl}
       />
       <main className="container mx-auto px-4 py-8">
@@ -104,3 +110,4 @@ const Index = () => {
 };
 
 export default Index;
+
