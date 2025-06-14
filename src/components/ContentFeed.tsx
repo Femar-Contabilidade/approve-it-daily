@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { ContentCard } from "@/components/ContentCard";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 
 interface ContentItem {
   id: string;
@@ -38,9 +39,9 @@ export const ContentFeed = ({ filter, refreshTrigger, onContentCountsChange }: C
     
     try {
       const { data, error } = await supabase
-        .from('content_items')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .from<Database["public"]["Tables"]["content_items"]["Row"]>("content_items")
+        .select("*")
+        .order("created_at", { ascending: false });
 
       if (error) {
         console.error("Erro ao carregar conteúdo:", error);
@@ -56,11 +57,11 @@ export const ContentFeed = ({ filter, refreshTrigger, onContentCountsChange }: C
         id: item.id,
         title: item.title,
         content: item.content,
-        imageUrl: item.image_url,
-        status: item.status as 'pending' | 'approved' | 'rejected',
+        imageUrl: item.image_url ?? undefined,
+        status: (item.status || "pending") as 'pending' | 'approved' | 'rejected',
         timestamp: item.created_at,
         category: item.category,
-        type: item.type as 'text' | 'image' | 'mixed'
+        type: (item.type || "text") as 'text' | 'image' | 'mixed'
       }));
 
       setContentItems(items);
@@ -142,8 +143,8 @@ export const ContentFeed = ({ filter, refreshTrigger, onContentCountsChange }: C
   const handleApprove = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('content_items')
-        .update({ status: 'approved', updated_at: new Date().toISOString() })
+        .from<Database["public"]["Tables"]["content_items"]["Row"]>("content_items")
+        .update({ status: "approved", updated_at: new Date().toISOString() })
         .eq('id', id);
 
       if (error) {
@@ -179,8 +180,8 @@ export const ContentFeed = ({ filter, refreshTrigger, onContentCountsChange }: C
   const handleReject = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('content_items')
-        .update({ status: 'rejected', updated_at: new Date().toISOString() })
+        .from<Database["public"]["Tables"]["content_items"]["Row"]>("content_items")
+        .update({ status: "rejected", updated_at: new Date().toISOString() })
         .eq('id', id);
 
       if (error) {

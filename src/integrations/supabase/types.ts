@@ -9,7 +9,296 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      content_items: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          id: string
+          image_url: string | null
+          status: string | null
+          title: string
+          type: string | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          status?: string | null
+          title: string
+          type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          status?: string | null
+          title?: string
+          type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      custom_api_integrations: {
+        Row: {
+          config: Json | null
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          config?: Json | null
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          config?: Json | null
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      integration_evolution_api: {
+        Row: {
+          api_key: string | null
+          api_url: string | null
+          enabled: boolean | null
+          id: string
+        }
+        Insert: {
+          api_key?: string | null
+          api_url?: string | null
+          enabled?: boolean | null
+          id?: string
+        }
+        Update: {
+          api_key?: string | null
+          api_url?: string | null
+          enabled?: boolean | null
+          id?: string
+        }
+        Relationships: []
+      }
+      integration_google_auth: {
+        Row: {
+          client_id: string | null
+          client_secret: string | null
+          enabled: boolean | null
+          id: string
+        }
+        Insert: {
+          client_id?: string | null
+          client_secret?: string | null
+          enabled?: boolean | null
+          id?: string
+        }
+        Update: {
+          client_id?: string | null
+          client_secret?: string | null
+          enabled?: boolean | null
+          id?: string
+        }
+        Relationships: []
+      }
+      integration_mysql: {
+        Row: {
+          database: string | null
+          enabled: boolean | null
+          host: string | null
+          id: string
+          password: string | null
+          port: number | null
+          username: string | null
+        }
+        Insert: {
+          database?: string | null
+          enabled?: boolean | null
+          host?: string | null
+          id?: string
+          password?: string | null
+          port?: number | null
+          username?: string | null
+        }
+        Update: {
+          database?: string | null
+          enabled?: boolean | null
+          host?: string | null
+          id?: string
+          password?: string | null
+          port?: number | null
+          username?: string | null
+        }
+        Relationships: []
+      }
+      integration_notes: {
+        Row: {
+          api_key: string | null
+          api_url: string | null
+          enabled: boolean | null
+          id: string
+        }
+        Insert: {
+          api_key?: string | null
+          api_url?: string | null
+          enabled?: boolean | null
+          id?: string
+        }
+        Update: {
+          api_key?: string | null
+          api_url?: string | null
+          enabled?: boolean | null
+          id?: string
+        }
+        Relationships: []
+      }
+      integration_supabase: {
+        Row: {
+          anon_key: string | null
+          enabled: boolean | null
+          id: string
+          project_url: string | null
+          service_role_key: string | null
+        }
+        Insert: {
+          anon_key?: string | null
+          enabled?: boolean | null
+          id?: string
+          project_url?: string | null
+          service_role_key?: string | null
+        }
+        Update: {
+          anon_key?: string | null
+          enabled?: boolean | null
+          id?: string
+          project_url?: string | null
+          service_role_key?: string | null
+        }
+        Relationships: []
+      }
+      spreadsheet_columns: {
+        Row: {
+          column_letter: string
+          column_name: string
+          config_id: string
+          created_at: string
+          data_path: string | null
+          display_order: number | null
+          field_type: string
+          id: string
+          is_required: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          column_letter: string
+          column_name: string
+          config_id: string
+          created_at?: string
+          data_path?: string | null
+          display_order?: number | null
+          field_type: string
+          id?: string
+          is_required?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          column_letter?: string
+          column_name?: string
+          config_id?: string
+          created_at?: string
+          data_path?: string | null
+          display_order?: number | null
+          field_type?: string
+          id?: string
+          is_required?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spreadsheet_columns_config_id_fkey"
+            columns: ["config_id"]
+            isOneToOne: false
+            referencedRelation: "spreadsheet_config"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spreadsheet_config: {
+        Row: {
+          approved_tab: string | null
+          created_at: string
+          evaluation_tab: string | null
+          google_client_id: string | null
+          google_client_secret: string | null
+          id: string
+          logo_url: string | null
+          rejected_tab: string | null
+          requires_google_auth: boolean | null
+          spreadsheet_url: string
+          updated_at: string
+        }
+        Insert: {
+          approved_tab?: string | null
+          created_at?: string
+          evaluation_tab?: string | null
+          google_client_id?: string | null
+          google_client_secret?: string | null
+          id?: string
+          logo_url?: string | null
+          rejected_tab?: string | null
+          requires_google_auth?: boolean | null
+          spreadsheet_url: string
+          updated_at?: string
+        }
+        Update: {
+          approved_tab?: string | null
+          created_at?: string
+          evaluation_tab?: string | null
+          google_client_id?: string | null
+          google_client_secret?: string | null
+          id?: string
+          logo_url?: string | null
+          rejected_tab?: string | null
+          requires_google_auth?: boolean | null
+          spreadsheet_url?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      users: {
+        Row: {
+          created_at: string
+          id: string
+          password_hash: string
+          updated_at: string
+          user_type: string | null
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          password_hash: string
+          updated_at?: string
+          user_type?: string | null
+          username: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          password_hash?: string
+          updated_at?: string
+          user_type?: string | null
+          username?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
