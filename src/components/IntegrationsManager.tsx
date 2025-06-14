@@ -23,16 +23,16 @@ export const IntegrationsManager = () => {
   useEffect(() => {
     const fetchAll = async () => {
       // Evolution API
-      const { data: evo } = await supabase.from('integration_evolution_api').select('*').maybeSingle();
+      const { data: evo } = await supabase.from("integration_evolution_api").select('*').maybeSingle();
       if (evo) setEvolution({ apiKey: evo.api_key || "", apiUrl: evo.api_url || "", enabled: evo.enabled });
       // Google Auth
-      const { data: goog } = await supabase.from('integration_google_auth').select('*').maybeSingle();
+      const { data: goog } = await supabase.from("integration_google_auth").select('*').maybeSingle();
       if (goog) setGoogle({ clientId: goog.client_id || "", clientSecret: goog.client_secret || "", enabled: goog.enabled });
       // Supabase
-      const { data: supa } = await supabase.from('integration_supabase').select('*').maybeSingle();
+      const { data: supa } = await supabase.from("integration_supabase").select('*').maybeSingle();
       if (supa) setSupabaseCfg({ projectUrl: supa.project_url || "", anonKey: supa.anon_key || "", serviceRoleKey: supa.service_role_key || "", enabled: supa.enabled });
       // MySQL
-      const { data: mysqlRes } = await supabase.from('integration_mysql').select('*').maybeSingle();
+      const { data: mysqlRes } = await supabase.from("integration_mysql").select('*').maybeSingle();
       if (mysqlRes) setMysql({
         host: mysqlRes.host || "",
         port: mysqlRes.port ? mysqlRes.port.toString() : "",
@@ -42,17 +42,27 @@ export const IntegrationsManager = () => {
         enabled: mysqlRes.enabled,
       });
       // Notes
-      const { data: notesRes } = await supabase.from('integration_notes').select('*').maybeSingle();
+      const { data: notesRes } = await supabase.from("integration_notes").select('*').maybeSingle();
       if (notesRes) setNotes({ apiKey: notesRes.api_key || "", apiUrl: notesRes.api_url || "", enabled: notesRes.enabled });
       // Custom APIs
-      const { data: customs } = await supabase.from('custom_api_integrations').select('*');
+      const { data: customs } = await supabase.from("custom_api_integrations").select('*');
       setCustomApis(Array.isArray(customs) ? customs : []);
     };
     fetchAll();
   }, []);
 
   // Salvamento handlers:
-  const saveHandler = async (table: string, data: Record<string, any>) => {
+  // Use literal union type for known integration tables
+  const saveHandler = async (
+    table:
+      | "integration_evolution_api"
+      | "integration_google_auth"
+      | "integration_supabase"
+      | "integration_mysql"
+      | "integration_notes"
+      | "custom_api_integrations",
+    data: Record<string, any>
+  ) => {
     toast({ title: "Salvando...", description: `Salvando dados em ${table}.` });
     // Tenta update, se não existir faz insert:
     const { data: row } = await supabase.from(table).select('id').maybeSingle();
@@ -69,13 +79,13 @@ export const IntegrationsManager = () => {
       toast({ title: "Nome obrigatório", variant: "destructive" });
       return;
     }
-    await supabase.from('custom_api_integrations').insert([{
+    await supabase.from("custom_api_integrations").insert([{
       name: newCustom.name,
       description: newCustom.description,
       config: newCustom.config ? JSON.parse(newCustom.config) : {},
     }]);
     setNewCustom({ name: "", description: "", config: "" });
-    const { data: customs } = await supabase.from('custom_api_integrations').select('*');
+    const { data: customs } = await supabase.from("custom_api_integrations").select('*');
     setCustomApis(Array.isArray(customs) ? customs : []);
   };
 
