@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,6 +72,22 @@ export const Login = ({ onLogin, logoUrl }: LoginProps) => {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {/* BLOCO TEMPORÁRIO COM CREDENCIAL ADMIN */}
+          <div className="mb-6 p-3 bg-yellow-100 border border-yellow-300 rounded text-yellow-900 text-sm font-semibold">
+            <span className="block mb-1 text-yellow-800 font-bold">
+              ⚠️ Acesso temporário de administrador:
+            </span>
+            <div>
+              <span className="font-bold">Login:</span> <span className="font-mono">admin_temp</span>
+            </div>
+            <div>
+              <span className="font-bold">Senha:</span> <span className="font-mono">senha</span>
+            </div>
+            <div className="mt-1 text-xs text-yellow-700">
+              (Remova esse bloco após uso!)
+            </div>
+          </div>
+          {/* FIM BLOCO TEMPORÁRIO */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="username">Usuário</Label>
