@@ -45,12 +45,169 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_api_integrations: {
+        Row: {
+          config: Json | null
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          config?: Json | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          config?: Json | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      integration_evolution_api: {
+        Row: {
+          api_key: string | null
+          api_url: string | null
+          created_at: string | null
+          enabled: boolean | null
+          id: string
+        }
+        Insert: {
+          api_key?: string | null
+          api_url?: string | null
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+        }
+        Update: {
+          api_key?: string | null
+          api_url?: string | null
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+        }
+        Relationships: []
+      }
+      integration_google_auth: {
+        Row: {
+          client_id: string | null
+          client_secret: string | null
+          created_at: string | null
+          enabled: boolean | null
+          id: string
+        }
+        Insert: {
+          client_id?: string | null
+          client_secret?: string | null
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+        }
+        Update: {
+          client_id?: string | null
+          client_secret?: string | null
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+        }
+        Relationships: []
+      }
+      integration_mysql: {
+        Row: {
+          created_at: string | null
+          database: string | null
+          enabled: boolean | null
+          host: string | null
+          id: string
+          password: string | null
+          port: number | null
+          username: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          database?: string | null
+          enabled?: boolean | null
+          host?: string | null
+          id?: string
+          password?: string | null
+          port?: number | null
+          username?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          database?: string | null
+          enabled?: boolean | null
+          host?: string | null
+          id?: string
+          password?: string | null
+          port?: number | null
+          username?: string | null
+        }
+        Relationships: []
+      }
+      integration_notes: {
+        Row: {
+          api_key: string | null
+          api_url: string | null
+          created_at: string | null
+          enabled: boolean | null
+          id: string
+        }
+        Insert: {
+          api_key?: string | null
+          api_url?: string | null
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+        }
+        Update: {
+          api_key?: string | null
+          api_url?: string | null
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+        }
+        Relationships: []
+      }
+      integration_supabase: {
+        Row: {
+          anon_key: string | null
+          created_at: string | null
+          enabled: boolean | null
+          id: string
+          project_url: string | null
+          service_role_key: string | null
+        }
+        Insert: {
+          anon_key?: string | null
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+          project_url?: string | null
+          service_role_key?: string | null
+        }
+        Update: {
+          anon_key?: string | null
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+          project_url?: string | null
+          service_role_key?: string | null
+        }
+        Relationships: []
+      }
       spreadsheet_columns: {
         Row: {
           column_letter: string
           column_name: string
           config_id: string
           created_at: string
+          data_path: string | null
           display_order: number | null
           field_type: string
           id: string
@@ -62,6 +219,7 @@ export type Database = {
           column_name: string
           config_id: string
           created_at?: string
+          data_path?: string | null
           display_order?: number | null
           field_type: string
           id?: string
@@ -73,6 +231,7 @@ export type Database = {
           column_name?: string
           config_id?: string
           created_at?: string
+          data_path?: string | null
           display_order?: number | null
           field_type?: string
           id?: string

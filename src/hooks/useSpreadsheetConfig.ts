@@ -7,9 +7,10 @@ export interface SpreadsheetColumn {
   id: string;
   columnLetter: string;
   columnName: string;
-  fieldType: 'title' | 'content' | 'image_url' | 'category' | 'custom';
+  fieldType: 'title' | 'content' | 'image_url' | 'category' | 'custom' | 'notes';
   isRequired: boolean;
   displayOrder: number;
+  dataPath?: string; // novo campo
 }
 
 export interface SpreadsheetConfig {
@@ -67,6 +68,7 @@ export const useSpreadsheetConfig = () => {
           fieldType: col.field_type as SpreadsheetColumn['fieldType'],
           isRequired: col.is_required || false,
           displayOrder: col.display_order || 0,
+          dataPath: col.data_path || "",
         })) || [];
 
         setConfig({
@@ -119,15 +121,13 @@ export const useSpreadsheetConfig = () => {
         return false;
       }
 
-      // Update columns
+      // Update columns (delete all, insert new - atomic)
       if (newConfig.id) {
-        // Delete existing columns
         await supabase
           .from('spreadsheet_columns')
           .delete()
           .eq('config_id', newConfig.id);
 
-        // Insert new columns
         if (newConfig.columns.length > 0) {
           const columnsToInsert = newConfig.columns.map(col => ({
             config_id: newConfig.id,
@@ -136,6 +136,7 @@ export const useSpreadsheetConfig = () => {
             field_type: col.fieldType,
             is_required: col.isRequired,
             display_order: col.displayOrder,
+            data_path: col.dataPath || "",
           }));
 
           const { error: columnsError } = await supabase

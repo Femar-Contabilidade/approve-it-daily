@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +19,13 @@ export const SpreadsheetColumnsManager = ({ columns, onColumnsChange }: Spreadsh
     columnName: "",
     fieldType: "custom" as SpreadsheetColumn['fieldType'],
     isRequired: false,
+    dataPath: "", // novo campo
   });
+
+  useEffect(() => {
+    // Corrige bug caso lista de colunas seja carregada
+    setEditingColumn(null);
+  }, [columns]);
 
   const fieldTypeOptions = [
     { value: 'title', label: 'Título' },
@@ -26,10 +33,11 @@ export const SpreadsheetColumnsManager = ({ columns, onColumnsChange }: Spreadsh
     { value: 'image_url', label: 'URL da Imagem' },
     { value: 'category', label: 'Categoria' },
     { value: 'custom', label: 'Campo Personalizado' },
+    { value: 'notes', label: 'Notes API' },
   ];
 
   const handleAddColumn = () => {
-    if (!newColumn.columnLetter || !newColumn.columnName) {
+    if (!newColumn.columnLetter || !newColumn.columnName || !newColumn.dataPath) {
       return;
     }
 
@@ -40,6 +48,7 @@ export const SpreadsheetColumnsManager = ({ columns, onColumnsChange }: Spreadsh
       fieldType: newColumn.fieldType,
       isRequired: newColumn.isRequired,
       displayOrder: columns.length + 1,
+      dataPath: newColumn.dataPath,
     };
 
     onColumnsChange([...columns, column]);
@@ -48,6 +57,7 @@ export const SpreadsheetColumnsManager = ({ columns, onColumnsChange }: Spreadsh
       columnName: "",
       fieldType: "custom",
       isRequired: false,
+      dataPath: "",
     });
   };
 
@@ -75,14 +85,14 @@ export const SpreadsheetColumnsManager = ({ columns, onColumnsChange }: Spreadsh
       <CardHeader>
         <CardTitle className="flex items-center">
           <Plus className="w-4 h-4 mr-2" />
-          Configuração de Colunas da Planilha
+          Configuração de Colunas da Planilha e APIs
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Add new column section */}
+        {/* Seção para adicionar nova coluna */}
         <div className="bg-gray-50 p-4 rounded-lg">
           <h4 className="font-medium mb-4">Adicionar Nova Coluna</h4>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
             <div>
               <Label htmlFor="columnLetter">Letra da Coluna</Label>
               <Input
@@ -118,6 +128,15 @@ export const SpreadsheetColumnsManager = ({ columns, onColumnsChange }: Spreadsh
                 ))}
               </select>
             </div>
+            <div>
+              <Label htmlFor="dataPath">Caminho/Dado Fonte</Label>
+              <Input
+                id="dataPath"
+                placeholder="Ex: notes.title, sheet.A"
+                value={newColumn.dataPath}
+                onChange={(e) => setNewColumn({ ...newColumn, dataPath: e.target.value })}
+              />
+            </div>
             <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
@@ -128,19 +147,19 @@ export const SpreadsheetColumnsManager = ({ columns, onColumnsChange }: Spreadsh
               />
               <Label htmlFor="isRequired" className="text-sm">Obrigatório</Label>
             </div>
-            <Button onClick={handleAddColumn} disabled={!newColumn.columnLetter || !newColumn.columnName}>
+            <Button onClick={handleAddColumn} disabled={!newColumn.columnLetter || !newColumn.columnName || !newColumn.dataPath}>
               <Plus className="w-4 h-4 mr-2" />
               Adicionar
             </Button>
           </div>
         </div>
 
-        {/* Existing columns list */}
+        {/* Lista de colunas existentes */}
         <div>
           <h4 className="font-medium mb-4">Colunas Configuradas</h4>
           {columns.length === 0 ? (
             <p className="text-gray-500 text-center py-8">
-              Nenhuma coluna configurada. Adicione colunas para começar a ler dados da planilha.
+              Nenhuma coluna configurada ainda.
             </p>
           ) : (
             <div className="space-y-2">
@@ -172,6 +191,12 @@ export const SpreadsheetColumnsManager = ({ columns, onColumnsChange }: Spreadsh
                           </option>
                         ))}
                       </select>
+                      <Input
+                        value={editingColumn.dataPath || ""}
+                        onChange={(e) => setEditingColumn({ ...editingColumn, dataPath: e.target.value })}
+                        placeholder="Ex: notes.title"
+                        className="flex-1"
+                      />
                       <div className="flex items-center space-x-1">
                         <input
                           type="checkbox"
@@ -196,6 +221,7 @@ export const SpreadsheetColumnsManager = ({ columns, onColumnsChange }: Spreadsh
                         <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
                           {fieldTypeOptions.find(opt => opt.value === column.fieldType)?.label}
                         </span>
+                        <span className="rounded-full px-2 py-1 bg-gray-100 text-xs">{column.dataPath}</span>
                         {column.isRequired && (
                           <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">
                             Obrigatório
