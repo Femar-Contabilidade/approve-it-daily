@@ -1,5 +1,5 @@
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { ContentCard } from "@/components/ContentCard";
 import { useToast } from "@/hooks/use-toast";
 import { useContentFeedData, ContentItem } from "@/hooks/useContentFeedData";
@@ -23,17 +23,33 @@ export const ContentFeed = ({ filter, refreshTrigger, onContentCountsChange }: C
   const approveContent = useApproveContent();
   const rejectContent = useRejectContent();
 
-  useEffect(() => { loadContent(); }, [refreshTrigger]);
+  // Ref para evitar chamadas duplicadas do useEffect de notificação
+  const prevContentLength = useRef<number | null>(null);
 
-  // Atualiza contadores sempre que itens mudam
   useEffect(() => {
-    if (onContentCountsChange)
+    loadContent();
+  }, [refreshTrigger]);
+
+  // Atualiza contadores apenas se realmente houve alteração
+  useEffect(() => {
+    if (
+      onContentCountsChange &&
+      prevContentLength.current !== contentItems.length
+    ) {
+      prevContentLength.current = contentItems.length;
       onContentCountsChange({
         all: contentItems.length,
         pending: contentItems.filter(i => i.status === 'pending').length,
         approved: contentItems.filter(i => i.status === 'approved').length,
         rejected: contentItems.filter(i => i.status === 'rejected').length,
       });
+      console.log("[ContentFeed] onContentCountsChange acionado: ", {
+        all: contentItems.length,
+        pending: contentItems.filter(i => i.status === 'pending').length,
+        approved: contentItems.filter(i => i.status === 'approved').length,
+        rejected: contentItems.filter(i => i.status === 'rejected').length,
+      });
+    }
   }, [contentItems, onContentCountsChange]);
 
   // Aprovação movendo a notícia
