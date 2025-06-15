@@ -1,4 +1,3 @@
-
 import { useEffect, useRef } from "react";
 import { ContentCard } from "@/components/ContentCard";
 import { useToast } from "@/hooks/use-toast";
@@ -26,9 +25,28 @@ export const ContentFeed = ({ filter, refreshTrigger, onContentCountsChange }: C
   // Ref para evitar chamadas duplicadas do useEffect de notificação
   const prevContentLength = useRef<number | null>(null);
 
+  // Quando o conteúdo for alterado, mostra toast informando que houve atualização (se não for carregamento manual)
+  const lastRefresh = useRef(Date.now());
+
   useEffect(() => {
     loadContent();
   }, [refreshTrigger]);
+
+  useEffect(() => {
+    lastRefresh.current = Date.now();
+  }, [refreshTrigger]);
+
+  useEffect(() => {
+    if (Date.now() - lastRefresh.current > 1500) {
+      // Evita mostrar toast no refresh manual do usuário
+      toast({
+        title: "Conteúdo atualizado",
+        description: "Novas notícias ou mudanças recebidas automaticamente pelo Supabase!",
+        variant: "default",
+      });
+    }
+    // eslint-disable-next-line
+  }, [contentItems]);
 
   // Atualiza contadores apenas se realmente houve alteração
   useEffect(() => {

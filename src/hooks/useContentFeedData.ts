@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface ContentItem {
@@ -18,8 +18,12 @@ export interface ContentItem {
 export const useContentFeedData = () => {
   const [contentItems, setContentItems] = useState<ContentItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  // Para evitar updates simultâneos do realtime
+  const loadingRef = useRef(false);
 
   const loadContent = async () => {
+    if (loadingRef.current) return;
+    loadingRef.current = true;
     setIsLoading(true);
 
     // PENDENTES
@@ -43,6 +47,7 @@ export const useContentFeedData = () => {
     if (pendingError || approvedError || rejectedError) {
       setContentItems([]);
       setIsLoading(false);
+      loadingRef.current = false;
       return;
     }
 
@@ -87,7 +92,47 @@ export const useContentFeedData = () => {
 
     setContentItems([...pendingItems, ...approvedItems, ...rejectedItems]);
     setIsLoading(false);
+    loadingRef.current = false;
   };
+
+  // Realtime
+  useEffect(() => {
+    // Chama 1x ao montar
+    loadContent();
+
+    // Cria channel para escutar mudanças nas três tabelas de conteúdo
+    const channel = supabase
+      .channel("content_feed_realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "content_items" },
+        (payload) => {
+          // Evita múltiplos reloads simultâneos
+          loadContent();
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "approved_news" },
+        (payload) => {
+          loadContent();
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "rejected_news" },
+        (payload) => {
+          loadContent();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+    // Atenção: não coloque o loadContent nas deps, só executa quando monta!
+    // eslint-disable-next-line
+  }, []);
 
   return { contentItems, setContentItems, isLoading, loadContent };
 };
