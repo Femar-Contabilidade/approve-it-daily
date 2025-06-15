@@ -4,11 +4,11 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Save } from "lucide-react";
+import { Save, Power } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Switch } from "@/components/ui/switch";
 
-// Tipos de webhooks definidos:
 const WEBHOOKS = [
   { type: "entrada_1", labelPadrao: "Webhook de Entrada 1" },
   { type: "entrada_2", labelPadrao: "Webhook de Entrada 2" },
@@ -21,6 +21,7 @@ type Webhook = {
   type: string;
   label: string;
   url: string;
+  enabled: boolean;
 };
 
 export const IntegrationsManager = () => {
@@ -28,14 +29,12 @@ export const IntegrationsManager = () => {
   const [webhooks, setWebhooks] = useState<Record<string, Webhook>>({});
   const [saving, setSaving] = useState<string | null>(null);
 
-  // Carrega webhooks existentes
   useEffect(() => {
     const fetchWebhooks = async () => {
       const { data, error } = await supabase
         .from("integration_webhooks")
         .select("*");
       if (!error && Array.isArray(data)) {
-        // Preenche objeto por tipo
         const hooks: Record<string, Webhook> = {};
         for (const wh of data) {
           hooks[wh.type] = {
@@ -43,6 +42,7 @@ export const IntegrationsManager = () => {
             type: wh.type,
             label: wh.label,
             url: wh.url,
+            enabled: typeof wh.enabled === "boolean" ? wh.enabled : true,
           };
         }
         setWebhooks(hooks);
@@ -51,12 +51,37 @@ export const IntegrationsManager = () => {
     fetchWebhooks();
   }, []);
 
-  // Atualiza um campo (label ou url) localmente
-  const updateWebhookField = (type: string, field: "label" | "url", value: string) => {
+  // Atualiza campos localmente
+  const updateWebhookField = (type: string, field: "label" | "url" | "enabled", value: string | boolean) => {
     setWebhooks((prev) => ({
       ...prev,
       [type]: { ...prev[type], type, [field]: value },
     }));
+  };
+
+  // Atualiza enabled no Supabase imediatamente
+  const toggleEnabled = async (type: string, value: boolean) => {
+    const wh = webhooks[type];
+    if (!wh) return;
+    setWebhooks((prev) => ({
+      ...prev,
+      [type]: { ...wh, enabled: value },
+    }));
+
+    if (wh.id) {
+      await supabase
+        .from("integration_webhooks")
+        .update({ enabled: value, updated_at: new Date().toISOString() })
+        .eq("id", wh.id);
+      toast({
+        title: value ? "Webhook ativado" : "Webhook desativado",
+        description: `O webhook "${wh.label}" está agora ${value ? 'ativo' : 'inativo'}.`,
+        variant: value ? "default" : "destructive",
+      });
+    } else {
+      // Se ainda não existe, salva o resto dos campos além do enabled normalmente ao salvar pelo botão
+      // Só atualiza visual local
+    }
   };
 
   // Salva/atualiza webhook no Supabase
@@ -72,16 +97,19 @@ export const IntegrationsManager = () => {
       return;
     }
     if (wh.id) {
-      // Update
       const { error } = await supabase
         .from("integration_webhooks")
-        .update({ label: wh.label, url: wh.url, updated_at: new Date().toISOString() })
+        .update({
+          label: wh.label,
+          url: wh.url,
+          enabled: wh.enabled,
+          updated_at: new Date().toISOString()
+        })
         .eq("id", wh.id);
       if (!error) {
         toast({ title: "Webhook atualizado!", variant: "default" });
       }
     } else {
-      // Insert
       const { data, error } = await supabase
         .from("integration_webhooks")
         .insert([
@@ -89,6 +117,7 @@ export const IntegrationsManager = () => {
             type: wh.type,
             label: wh.label,
             url: wh.url,
+            enabled: typeof wh.enabled === "boolean" ? wh.enabled : true,
           },
         ])
         .select();
@@ -106,11 +135,31 @@ export const IntegrationsManager = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {WEBHOOKS.map(({ type, labelPadrao }) => {
-        const wh = webhooks[type] || { type, label: labelPadrao, url: "" };
+        const wh = webhooks[type] || { type, label: labelPadrao, url: "", enabled: true };
         return (
           <Card key={type}>
-            <CardHeader>
-              <CardTitle>{labelPadrao}</CardTitle>
+            <CardHeader className="flex flex-col space-y-2">
+              <div className="flex items-center justify-between w-full">
+                <CardTitle>{labelPadrao}</CardTitle>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={!!wh.enabled}
+                      onCheckedChange={(val) => toggleEnabled(type, val)}
+                      aria-label={wh.enabled ? "Desativar" : "Ativar"}
+                    />
+                    {wh.enabled ? (
+                      <span className="text-green-700 text-xs flex items-center gap-1">
+                        <Power className="w-4 h-4 text-green-500" /> Ativo
+                      </span>
+                    ) : (
+                      <span className="text-red-700 text-xs flex items-center gap-1">
+                        <Power className="w-4 h-4 text-red-500" /> Inativo
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
