@@ -36,37 +36,33 @@ export const ContentFeed = ({ filter, refreshTrigger, onContentCountsChange }: C
       });
   }, [contentItems, onContentCountsChange]);
 
+  // Aprovação movendo a notícia
   const handleApprove = async (id: string) => {
+    const item = contentItems.find(i => i.id === id && i.status === 'pending');
+    if (!item) return;
     try {
-      await approveContent(id, contentItems);
-      setContentItems(items =>
-        items.map(item =>
-          item.id === id ? { ...item, status: 'approved' as const } : item
-        )
-      );
-      toast({ title: "Aprovado", description: "Notícia aprovada e enviada para integração." });
-      console.log("Notícia aprovada e enviada para Webhook de Entrada 1!");
+      await approveContent(item);
+      setContentItems(items => items.filter(i => i.id !== id));
+      toast({ title: "Aprovado", description: "Notícia aprovada!", variant: "default" });
     } catch {
       toast({ title: "Erro ao aprovar", variant: "destructive" });
-      console.log("Falha ao aprovar conteúdo.");
-    }
-  };
-  const handleReject = async (id: string) => {
-    try {
-      await rejectContent(id, contentItems);
-      setContentItems(items =>
-        items.map(item =>
-          item.id === id ? { ...item, status: 'rejected' as const } : item
-        )
-      );
-      toast({ title: "Rejeitado", description: "Notícia rejeitada e enviada para integração." });
-      console.log("Notícia rejeitada e enviada para Webhook de Entrada 2!");
-    } catch {
-      toast({ title: "Erro ao rejeitar", variant: "destructive" });
-      console.log("Falha ao rejeitar conteúdo.");
     }
   };
 
+  // Rejeição movendo a notícia
+  const handleReject = async (id: string) => {
+    const item = contentItems.find(i => i.id === id && i.status === 'pending');
+    if (!item) return;
+    try {
+      await rejectContent(item);
+      setContentItems(items => items.filter(i => i.id !== id));
+      toast({ title: "Rejeitado", description: "Notícia reprovada!", variant: "default" });
+    } catch {
+      toast({ title: "Erro ao rejeitar", variant: "destructive" });
+    }
+  };
+
+  // Filtro
   const filteredItems = contentItems.filter(item => filter === 'all' ? true : item.status === filter);
 
   if (isLoading) {

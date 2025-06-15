@@ -9,6 +9,45 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      approved_news: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          id: string
+          image_url: string | null
+          original_created_at: string | null
+          source_url: string | null
+          status: string
+          title: string
+          type: string | null
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          original_created_at?: string | null
+          source_url?: string | null
+          status?: string
+          title: string
+          type?: string | null
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          original_created_at?: string | null
+          source_url?: string | null
+          status?: string
+          title?: string
+          type?: string | null
+        }
+        Relationships: []
+      }
       content_items: {
         Row: {
           category: string
@@ -276,6 +315,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      rejected_news: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          id: string
+          image_url: string | null
+          original_created_at: string | null
+          source_url: string | null
+          status: string
+          title: string
+          type: string | null
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          original_created_at?: string | null
+          source_url?: string | null
+          status?: string
+          title: string
+          type?: string | null
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          original_created_at?: string | null
+          source_url?: string | null
+          status?: string
+          title?: string
+          type?: string | null
+        }
+        Relationships: []
       }
       spreadsheet_columns: {
         Row: {

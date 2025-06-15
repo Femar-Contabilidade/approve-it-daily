@@ -2,67 +2,54 @@
 import { supabase } from "@/integrations/supabase/client";
 import { ContentItem } from "./useContentFeedData";
 
-// Aprova conteúdo, dispara webhooks e registra pendente saída
+// Move item para `approved_news`, remove de `content_items`
 export const useApproveContent = () => {
-  return async (id: string, contentItems: ContentItem[]) => {
-    const { error } = await supabase
-      .from("content_items")
-      .update({ status: "approved", updated_at: new Date().toISOString() })
-      .eq('id', id);
-    if (error) throw error;
+  return async (item: ContentItem) => {
+    // 1. Inserir na tabela approved_news
+    const { error: insertError } = await supabase.from("approved_news").insert([{
+      id: item.id,
+      title: item.title,
+      content: item.content,
+      image_url: item.imageUrl,
+      status: "approved",
+      created_at: item.timestamp,
+      category: item.category,
+      type: item.type,
+      source_url: item.sourceUrl,
+      original_created_at: item.originalCreatedAt,
+    }]);
+    if (insertError) throw insertError;
 
-    // Busca o item aprovado para o payload do webhook
-    const item = contentItems.find(i => i.id === id);
-    if (item) {
-      // Envia para Webhook de Entrada 1 caso configurado
-      const { data } = await supabase.from("integration_webhooks").select("*").eq("type", "entrada_1").eq("enabled", true).maybeSingle();
-      if (data && data.url) {
-        await fetch(data.url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...item,
-            event: "aprovado"
-          })
-        });
-      }
-      // Registra saída pendente
-      await supabase.from("pending_outgoing_news").insert([
-        { content_id: id, status: "approved" }
-      ]);
-    }
+    // 2. Remover da tabela content_items
+    const { error: deleteError } = await supabase.from("content_items").delete().eq("id", item.id);
+    if (deleteError) throw deleteError;
+
     return true;
   };
 };
-// Reprova conteúdo, dispara webhooks e registra pendente saída
-export const useRejectContent = () => {
-  return async (id: string, contentItems: ContentItem[]) => {
-    const { error } = await supabase
-      .from("content_items")
-      .update({ status: "rejected", updated_at: new Date().toISOString() })
-      .eq('id', id);
-    if (error) throw error;
 
-    // Busca o item rejeitado para o payload do webhook
-    const item = contentItems.find(i => i.id === id);
-    if (item) {
-      // Envia para Webhook de Entrada 2 caso configurado
-      const { data } = await supabase.from("integration_webhooks").select("*").eq("type", "entrada_2").eq("enabled", true).maybeSingle();
-      if (data && data.url) {
-        await fetch(data.url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...item,
-            event: "reprovado"
-          })
-        });
-      }
-      // Registra saída pendente
-      await supabase.from("pending_outgoing_news").insert([
-        { content_id: id, status: "rejected" }
-      ]);
-    }
+// Move item para `rejected_news`, remove de `content_items`
+export const useRejectContent = () => {
+  return async (item: ContentItem) => {
+    // 1. Inserir na tabela rejected_news
+    const { error: insertError } = await supabase.from("rejected_news").insert([{
+      id: item.id,
+      title: item.title,
+      content: item.content,
+      image_url: item.imageUrl,
+      status: "rejected",
+      created_at: item.timestamp,
+      category: item.category,
+      type: item.type,
+      source_url: item.sourceUrl,
+      original_created_at: item.originalCreatedAt,
+    }]);
+    if (insertError) throw insertError;
+
+    // 2. Remover da tabela content_items
+    const { error: deleteError } = await supabase.from("content_items").delete().eq("id", item.id);
+    if (deleteError) throw deleteError;
+
     return true;
   };
 };

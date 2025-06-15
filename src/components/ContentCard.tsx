@@ -14,6 +14,8 @@ interface ContentItem {
   status: 'pending' | 'approved' | 'rejected';
   timestamp: string;
   category: string;
+  sourceUrl?: string;
+  originalCreatedAt?: string;
 }
 
 interface ContentCardProps {
@@ -65,8 +67,12 @@ export const ContentCard = ({ item, onApprove, onReject }: ContentCardProps) => 
                 <span className="ml-1">{getStatusLabel(item.status)}</span>
               </Badge>
             </div>
-            <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
+            <div className="flex flex-wrap items-center space-x-4 text-sm text-gray-500 mb-3">
               <span>{item.category}</span>
+              {item.sourceUrl && <>
+                <span>•</span>
+                <a href={item.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Fonte</a>
+              </>}
               <span>•</span>
               <span>{formatTimestamp(item.timestamp)}</span>
               <span>•</span>
@@ -108,7 +114,7 @@ export const ContentCard = ({ item, onApprove, onReject }: ContentCardProps) => 
                 className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
               >
                 <X className="w-4 h-4 mr-1" />
-                Rejeitar
+                Reprovar
               </Button>
               <Button
                 size="sm"
