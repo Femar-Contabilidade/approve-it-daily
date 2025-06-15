@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Settings as SettingsIcon, Save, Upload, Users, Plus, Edit, Trash2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SpreadsheetColumnsManager } from "@/components/SpreadsheetColumnsManager";
 import { IntegrationsManager } from "@/components/IntegrationsManager";
 import { useSpreadsheetConfig, SpreadsheetConfig } from "@/hooks/useSpreadsheetConfig";
 
@@ -54,16 +54,6 @@ export const Settings = ({ isOpen, onClose, onSave }: SettingsProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!localConfig.spreadsheetUrl) {
-      toast({
-        title: "Erro",
-        description: "Por favor, insira a URL da planilha.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     const success = await saveConfig(localConfig);
     if (success) {
       onSave(localConfig);
@@ -149,99 +139,18 @@ export const Settings = ({ isOpen, onClose, onSave }: SettingsProps) => {
             <CardTitle>Configurações do Sistema</CardTitle>
           </div>
           <CardDescription>
-            Configure a planilha, colunas, integrações, logo da empresa e gerencie usuários
+            Configure integrações, logo da empresa e gerencie usuários
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="spreadsheet" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="spreadsheet">Planilha</TabsTrigger>
-              <TabsTrigger value="columns">Colunas</TabsTrigger>
+          <Tabs defaultValue="branding" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="branding">Logo</TabsTrigger>
               <TabsTrigger value="integrations">Integrações</TabsTrigger>
               <TabsTrigger value="users">Usuários</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="spreadsheet" className="space-y-4">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="spreadsheetUrl">URL da Planilha Google Sheets</Label>
-                  <Input
-                    id="spreadsheetUrl"
-                    type="url"
-                    placeholder="https://docs.google.com/spreadsheets/d/..."
-                    value={localConfig.spreadsheetUrl}
-                    onChange={(e) => setLocalConfig({ ...localConfig, spreadsheetUrl: e.target.value })}
-                    required
-                  />
-                </div>
-                
-                <div className="grid grid-cols-1 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="evaluationTab">Aba de Avaliação</Label>
-                    <Input
-                      id="evaluationTab"
-                      type="text"
-                      placeholder="Nome da aba para avaliação"
-                      value={localConfig.evaluationTab}
-                      onChange={(e) => setLocalConfig({ ...localConfig, evaluationTab: e.target.value })}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="approvedTab">Aba de Aprovados</Label>
-                    <Input
-                      id="approvedTab"
-                      type="text"
-                      placeholder="Nome da aba para aprovados"
-                      value={localConfig.approvedTab}
-                      onChange={(e) => setLocalConfig({ ...localConfig, approvedTab: e.target.value })}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="rejectedTab">Aba de Rejeitados</Label>
-                    <Input
-                      id="rejectedTab"
-                      type="text"
-                      placeholder="Nome da para rejeitados"
-                      value={localConfig.rejectedTab}
-                      onChange={(e) => setLocalConfig({ ...localConfig, rejectedTab: e.target.value })}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="flex justify-end space-x-2 pt-4">
-                  <Button type="button" variant="outline" onClick={onClose}>
-                    Cancelar
-                  </Button>
-                  <Button type="submit" disabled={isLoading}>
-                    <Save className="w-4 h-4 mr-2" />
-                    Salvar Configurações
-                  </Button>
-                </div>
-              </form>
-            </TabsContent>
-
-            <TabsContent value="columns" className="space-y-4">
-              <SpreadsheetColumnsManager
-                columns={localConfig.columns}
-                onColumnsChange={(columns) => setLocalConfig({ ...localConfig, columns })}
-              />
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button type="button" variant="outline" onClick={onClose}>
-                  Cancelar
-                </Button>
-                <Button onClick={() => handleSubmit({ preventDefault: () => {} } as React.FormEvent)} disabled={isLoading}>
-                  <Save className="w-4 h-4 mr-2" />
-                  Salvar Colunas
-                </Button>
-              </div>
-            </TabsContent>
-
+            {/* Branding */}
             <TabsContent value="branding" className="space-y-4">
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -270,7 +179,6 @@ export const Settings = ({ isOpen, onClose, onSave }: SettingsProps) => {
                     </div>
                   )}
                 </div>
-
                 <div className="flex justify-end space-x-2 pt-4">
                   <Button type="button" variant="outline" onClick={onClose}>
                     Cancelar
@@ -283,10 +191,12 @@ export const Settings = ({ isOpen, onClose, onSave }: SettingsProps) => {
               </div>
             </TabsContent>
 
+            {/* Integrações */}
             <TabsContent value="integrations" className="space-y-4">
               <IntegrationsManager />
             </TabsContent>
 
+            {/* Usuários */}
             <TabsContent value="users" className="space-y-4">
               <div className="space-y-6">
                 <div className="bg-gray-50 p-4 rounded-lg">
@@ -386,7 +296,6 @@ export const Settings = ({ isOpen, onClose, onSave }: SettingsProps) => {
                     ))}
                   </div>
                 </div>
-
                 <div className="flex justify-end space-x-2 pt-4">
                   <Button type="button" variant="outline" onClick={onClose}>
                     Fechar
