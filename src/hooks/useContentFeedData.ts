@@ -55,8 +55,8 @@ export const useContentFeedData = () => {
       timestamp: item.created_at,
       category: item.category,
       type: (item.type || "text") as 'text' | 'image' | 'mixed',
-      sourceUrl: item.source_url,
-      originalCreatedAt: item.original_created_at,
+      sourceUrl: (item as any).source_url ?? undefined,
+      originalCreatedAt: (item as any).original_created_at ?? undefined,
     }));
 
     const approvedItems: ContentItem[] = (approved ?? []).map(item => ({
@@ -68,8 +68,8 @@ export const useContentFeedData = () => {
       timestamp: item.created_at,
       category: item.category,
       type: (item.type || "text") as 'text' | 'image' | 'mixed',
-      sourceUrl: item.source_url,
-      originalCreatedAt: item.original_created_at,
+      sourceUrl: item.source_url ?? undefined,
+      originalCreatedAt: item.original_created_at ?? undefined,
     }));
 
     const rejectedItems: ContentItem[] = (rejected ?? []).map(item => ({
@@ -81,8 +81,8 @@ export const useContentFeedData = () => {
       timestamp: item.created_at,
       category: item.category,
       type: (item.type || "text") as 'text' | 'image' | 'mixed',
-      sourceUrl: item.source_url,
-      originalCreatedAt: item.original_created_at,
+      sourceUrl: item.source_url ?? undefined,
+      originalCreatedAt: item.original_created_at ?? undefined,
     }));
 
     setContentItems([...pendingItems, ...approvedItems, ...rejectedItems]);
