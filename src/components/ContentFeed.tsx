@@ -39,7 +39,7 @@ export const ContentFeed = ({ filter, refreshTrigger, onContentCountsChange }: C
     
     try {
       const { data, error } = await supabase
-        .from<Database["public"]["Tables"]["content_items"]["Row"]>("content_items")
+        .from("content_items")
         .select("*")
         .order("created_at", { ascending: false });
 
@@ -53,7 +53,12 @@ export const ContentFeed = ({ filter, refreshTrigger, onContentCountsChange }: C
         return;
       }
 
-      const items = (data || []).map(item => ({
+      if (!data) {
+        setContentItems([]);
+        return;
+      }
+
+      const items = data.map(item => ({
         id: item.id,
         title: item.title,
         content: item.content,
@@ -129,21 +134,19 @@ export const ContentFeed = ({ filter, refreshTrigger, onContentCountsChange }: C
     }
   };
 
-  // Load content on component mount and when refresh is triggered
   useEffect(() => {
     if (refreshTrigger === 0) {
-      // Initial load from database
       loadContentFromDatabase();
     } else {
-      // Refresh triggered - sync with Google Sheets first
       syncWithGoogleSheets();
     }
+    // eslint-disable-next-line
   }, [refreshTrigger]);
 
   const handleApprove = async (id: string) => {
     try {
       const { error } = await supabase
-        .from<Database["public"]["Tables"]["content_items"]["Row"]>("content_items")
+        .from("content_items")
         .update({ status: "approved", updated_at: new Date().toISOString() })
         .eq('id', id);
 
@@ -180,7 +183,7 @@ export const ContentFeed = ({ filter, refreshTrigger, onContentCountsChange }: C
   const handleReject = async (id: string) => {
     try {
       const { error } = await supabase
-        .from<Database["public"]["Tables"]["content_items"]["Row"]>("content_items")
+        .from("content_items")
         .update({ status: "rejected", updated_at: new Date().toISOString() })
         .eq('id', id);
 

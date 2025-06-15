@@ -23,16 +23,16 @@ export const IntegrationsManager = () => {
   useEffect(() => {
     const fetchAll = async () => {
       // Evolution API
-      const { data: evo } = await supabase.from<Database["public"]["Tables"]["integration_evolution_api"]["Row"]>("integration_evolution_api").select('*').maybeSingle();
+      const { data: evo } = await supabase.from("integration_evolution_api").select('*').maybeSingle();
       if (evo) setEvolution({ apiKey: evo.api_key || "", apiUrl: evo.api_url || "", enabled: evo.enabled });
       // Google Auth
-      const { data: goog } = await supabase.from<Database["public"]["Tables"]["integration_google_auth"]["Row"]>("integration_google_auth").select('*').maybeSingle();
+      const { data: goog } = await supabase.from("integration_google_auth").select('*').maybeSingle();
       if (goog) setGoogle({ clientId: goog.client_id || "", clientSecret: goog.client_secret || "", enabled: goog.enabled });
       // Supabase
-      const { data: supa } = await supabase.from<Database["public"]["Tables"]["integration_supabase"]["Row"]>("integration_supabase").select('*').maybeSingle();
+      const { data: supa } = await supabase.from("integration_supabase").select('*').maybeSingle();
       if (supa) setSupabaseCfg({ projectUrl: supa.project_url || "", anonKey: supa.anon_key || "", serviceRoleKey: supa.service_role_key || "", enabled: supa.enabled });
       // MySQL
-      const { data: mysqlRes } = await supabase.from<Database["public"]["Tables"]["integration_mysql"]["Row"]>("integration_mysql").select('*').maybeSingle();
+      const { data: mysqlRes } = await supabase.from("integration_mysql").select('*').maybeSingle();
       if (mysqlRes) setMysql({
         host: mysqlRes.host || "",
         port: mysqlRes.port ? mysqlRes.port.toString() : "",
@@ -42,10 +42,10 @@ export const IntegrationsManager = () => {
         enabled: mysqlRes.enabled,
       });
       // Notes
-      const { data: notesRes } = await supabase.from<Database["public"]["Tables"]["integration_notes"]["Row"]>("integration_notes").select('*').maybeSingle();
+      const { data: notesRes } = await supabase.from("integration_notes").select('*').maybeSingle();
       if (notesRes) setNotes({ apiKey: notesRes.api_key || "", apiUrl: notesRes.api_url || "", enabled: notesRes.enabled });
       // Custom APIs
-      const { data: customs } = await supabase.from<Database["public"]["Tables"]["custom_api_integrations"]["Row"]>("custom_api_integrations").select('*');
+      const { data: customs } = await supabase.from("custom_api_integrations").select('*');
       setCustomApis(Array.isArray(customs) ? customs : []);
     };
     fetchAll();
@@ -65,11 +65,11 @@ export const IntegrationsManager = () => {
   ) => {
     toast({ title: "Salvando...", description: `Salvando dados em ${table}.` });
     // Tenta update, se não existir faz insert:
-    const { data: row } = await supabase.from<Database["public"]["Tables"][typeof table]["Row"]>(table).select('id').maybeSingle();
+    const { data: row } = await supabase.from(table).select('id').maybeSingle();
     if (row && row.id) {
-      await supabase.from<Database["public"]["Tables"][typeof table]["Row"]>(table).update(data).eq('id', row.id);
+      await supabase.from(table).update(data).eq('id', row.id);
     } else {
-      await supabase.from<Database["public"]["Tables"][typeof table]["Row"]>(table).insert([data]);
+      await supabase.from(table).insert([data]);
     }
     toast({ title: "Salvo!", description: "Configuração salva com sucesso." });
   };
