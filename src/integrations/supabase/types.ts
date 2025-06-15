@@ -183,6 +183,33 @@ export type Database = {
         }
         Relationships: []
       }
+      integration_webhooks: {
+        Row: {
+          created_at: string | null
+          id: string
+          label: string
+          type: string
+          updated_at: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          label: string
+          type: string
+          updated_at?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          label?: string
+          type?: string
+          updated_at?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
       spreadsheet_columns: {
         Row: {
           column_letter: string
