@@ -82,16 +82,16 @@ export const ContentFeed = ({ filter, refreshTrigger, onContentCountsChange }: C
   const filteredItems = contentItems.filter(item => filter === 'all' ? true : item.status === filter);
 
   if (isLoading) {
-    return <div className="text-center py-12">Carregando conteúdo...</div>;
+    return <div className="text-center py-12 text-lg animate-pulse">Carregando conteúdo...</div>;
   }
 
   return (
     <div>
       <FeedTestActions />
       {filteredItems.length === 0 ? (
-        <div className="text-center py-12">Nenhum conteúdo encontrado.</div>
+        <div className="text-center py-12 text-lg text-muted-foreground">Nenhum conteúdo encontrado.</div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-6 md:space-y-8 animate-fade-in">
           {filteredItems.map(item => (
             <ContentCard
               key={item.id}
