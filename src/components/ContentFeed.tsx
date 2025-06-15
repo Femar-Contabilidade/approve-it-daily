@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { ContentCard } from "@/components/ContentCard";
 import { useToast } from "@/hooks/use-toast";
@@ -25,6 +24,31 @@ interface ContentFeedProps {
     approved: number;
     rejected: number;
   }) => void;
+}
+
+async function registerPendingOutgoingNews(content_id: string, status: "approved" | "rejected") {
+  // Envia para a tabela de pendências de saída
+  await supabase.from("pending_outgoing_news").insert([
+    {
+      content_id,
+      status,
+    }
+  ]);
+}
+
+async function triggerWebhookIfEnabled(type: "entrada_1" | "entrada_2", item: ContentItem) {
+  // Busca o webhook configurado e se está ativo
+  const { data } = await supabase.from("integration_webhooks").select("*").eq("type", type).eq("enabled", true).maybeSingle();
+  if (data && data.url) {
+    await fetch(data.url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...item,
+        event: type === "entrada_1" ? "aprovado" : "reprovado",
+      })
+    });
+  }
 }
 
 export const ContentFeed = ({ filter, refreshTrigger, onContentCountsChange }: ContentFeedProps) => {
@@ -160,11 +184,18 @@ export const ContentFeed = ({ filter, refreshTrigger, onContentCountsChange }: C
         return;
       }
 
-      setContentItems(items => 
-        items.map(item => 
+      setContentItems(items =>
+        items.map(item =>
           item.id === id ? { ...item, status: 'approved' as const } : item
         )
       );
+
+      // Busca o item aprovado para payload do webhook
+      const item = contentItems.find(i => i.id === id);
+      if (item) {
+        await triggerWebhookIfEnabled("entrada_1", item);
+        await registerPendingOutgoingNews(id, "approved");
+      }
 
       toast({
         title: "Conteúdo Aprovado",
@@ -197,11 +228,18 @@ export const ContentFeed = ({ filter, refreshTrigger, onContentCountsChange }: C
         return;
       }
 
-      setContentItems(items => 
-        items.map(item => 
+      setContentItems(items =>
+        items.map(item =>
           item.id === id ? { ...item, status: 'rejected' as const } : item
         )
       );
+
+      // Busca o item rejeitado para payload do webhook
+      const item = contentItems.find(i => i.id === id);
+      if (item) {
+        await triggerWebhookIfEnabled("entrada_2", item);
+        await registerPendingOutgoingNews(id, "rejected");
+      }
 
       toast({
         title: "Conteúdo Rejeitado",

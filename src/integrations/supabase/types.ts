@@ -213,6 +213,70 @@ export type Database = {
         }
         Relationships: []
       }
+      outgoing_news_logs: {
+        Row: {
+          content_id: string
+          delivered: boolean | null
+          id: string
+          sent_at: string | null
+          webhook_type: string
+        }
+        Insert: {
+          content_id: string
+          delivered?: boolean | null
+          id?: string
+          sent_at?: string | null
+          webhook_type: string
+        }
+        Update: {
+          content_id?: string
+          delivered?: boolean | null
+          id?: string
+          sent_at?: string | null
+          webhook_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outgoing_news_logs_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pending_outgoing_news: {
+        Row: {
+          content_id: string
+          created_at: string | null
+          id: string
+          sent_at: string | null
+          status: string
+        }
+        Insert: {
+          content_id: string
+          created_at?: string | null
+          id?: string
+          sent_at?: string | null
+          status: string
+        }
+        Update: {
+          content_id?: string
+          created_at?: string | null
+          id?: string
+          sent_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pending_outgoing_news_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       spreadsheet_columns: {
         Row: {
           column_letter: string

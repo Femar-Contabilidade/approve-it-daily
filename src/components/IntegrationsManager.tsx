@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -162,26 +161,60 @@ export const IntegrationsManager = () => {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <Label>Nome/Rótulo</Label>
-                <Input
-                  value={wh.label}
-                  onChange={(e) =>
-                    updateWebhookField(type, "label", e.target.value)
-                  }
-                  placeholder={labelPadrao}
-                />
-              </div>
-              <div>
-                <Label>URL do Webhook</Label>
-                <Input
-                  value={wh.url}
-                  onChange={(e) =>
-                    updateWebhookField(type, "url", e.target.value)
-                  }
-                  placeholder="https://sua.url/aqui"
-                />
-              </div>
+              {type === "saida_2" && (
+                <div>
+                  <Label>Nome do Webhook</Label>
+                  <Input
+                    value={wh.label}
+                    onChange={e => updateWebhookField(type, "label", e.target.value)}
+                    placeholder="Nome do Webhook"
+                  />
+                  <Label>URL do Webhook</Label>
+                  <Input
+                    value={wh.url}
+                    onChange={e => updateWebhookField(type, "url", e.target.value)}
+                    placeholder="https://seu-webhook.com/saida2"
+                  />
+                </div>
+              )}
+
+              {type !== "saida_2" && (
+                <div>
+                  <Label>Nome/Rótulo</Label>
+                  <Input
+                    value={wh.label}
+                    onChange={(e) =>
+                      updateWebhookField(type, "label", e.target.value)
+                    }
+                    placeholder={labelPadrao}
+                  />
+                </div>
+              )}
+              {type !== "saida_2" && (
+                <div>
+                  <Label>URL do Webhook</Label>
+                  <Input
+                    value={wh.url}
+                    onChange={(e) =>
+                      updateWebhookField(type, "url", e.target.value)
+                    }
+                    placeholder="https://sua.url/aqui"
+                  />
+                </div>
+              )}
+              {type === "saida_1" && (
+                <div className="my-2">
+                  <Label>Endpoint de Consulta Direta:</Label>
+                  <Input
+                    className="font-mono"
+                    value={`https://gpydaxmwsucoiwrrfgrc.supabase.co/functions/v1/list-pending-news?status=approved`}
+                    readOnly
+                  />
+                  <span className="text-xs text-muted-foreground">
+                    Utilize este link para consultar todas as notícias aprovadas pendentes (atualização automática).
+                  </span>
+                </div>
+              )}
               <Button
                 onClick={() => saveWebhook(webhooks[type] || wh)}
                 disabled={saving === type}
